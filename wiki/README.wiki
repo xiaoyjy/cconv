@@ -25,6 +25,6 @@ Convert encoding of given files from one encoding to another.
 
  Output control:
   -o, --output=FILE          output file<br/><br/>
-  -?, --help                 Give this help list
+  -?, --help                 Give this help list<br/>
       --usage                Give a short usage message
   -V, --version              Print program version
