@@ -1,5 +1,3 @@
-#summary One-sentence summary of this page.
-
 = Introduction =
 
 A iconv based simplified-traditional chinese conversion tool
@@ -13,8 +11,3 @@ $ make<br/>
 $ make install<br/>
 
 = Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
