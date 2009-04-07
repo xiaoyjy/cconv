@@ -29,6 +29,6 @@ Convert encoding of given files from one encoding to another.
       --usage                Give a short usage message
   -V, --version              Print program version
 
-Example:
-* $ echo "内存， 海内存知已，后天，皇后" | cconv -f utf-8 -t utf8-tw
-* 記憶體， 海內存知已，後天，皇后
+Example:<br/>
+* $ echo "内存， 海内存知已，后天，皇后" | cconv -f utf-8 -t utf8-tw<br/>
+* 記憶體， 海內存知已，後天，皇后 <br/>
