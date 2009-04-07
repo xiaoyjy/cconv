@@ -9,7 +9,9 @@ iconv is a open source international text conversion tool, if you do not know ic
 As usual for GNU packages:
 
 $ ./configure --prefix=/usr/local
+
 $ make
+
 $ make install
 
 = Details =
