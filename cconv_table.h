@@ -1,5 +1,15 @@
-#ifndef _JCONV_TABLE_H_
-#define _JCONV_TABLE_H_
+/*
+ * Copyright (C) 2008, 2009
+ * Free Software Foundation, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ */
+
+#ifndef _CCONV_TABLE_H_
+#define _CCONV_TABLE_H_
 
 typedef struct ccchar
 {
