@@ -1,0 +1,11 @@
+= 简介 =
+
+由于现行的简繁转换工具中，大数只是支持单字之间的一一对应转换，即使像word这样的工具中，有一些简单的转换功能，但效果也不是很想理。
+
+cconv正致力于解决这样的问题
+
+cconv的用法与iconv相关，对于不太了解iconv的朋友，可以先看看
+http://www.gnu.org/software/libiconv/documentation/libiconv/iconv.1.html
+
+
+= 安装 =
