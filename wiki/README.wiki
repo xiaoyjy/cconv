@@ -24,8 +24,7 @@ Convert encoding of given files from one encoding to another.
   -l, --list                 list all known coded character sets
 
  Output control:
-  -o, --output=FILE          output file
-
+  -o, --output=FILE          output file<br/><br/>
   -?, --help                 Give this help list
       --usage                Give a short usage message
   -V, --version              Print program version
