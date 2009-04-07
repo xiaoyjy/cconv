@@ -1,11 +1,25 @@
+#labels Phase-Deploy
 = 简介 =
 
 由于现行的简繁转换工具中，大数只是支持单字之间的一一对应转换，即使像word这样的工具中，有一些简单的转换功能，但效果也不是很想理。
 
-cconv正致力于解决这样的问题
+cconv正致力于解决这样的问题。
 
 cconv的用法与iconv相关，对于不太了解iconv的朋友，可以先看看
 http://www.gnu.org/software/libiconv/documentation/libiconv/iconv.1.html
 
 
 = 安装 =
+到 http://code.google.com/p/cconv/downloads/list 下载最新的源代码文件
+
+{{{
+$tar zxvf cconv-x.x.x.tar.gz
+$cd cconv-x.x.x
+$ ./configure --prefix=/usr/local
+$ make
+$ make install
+}}}
+
+= 使用 =
+$ echo "内存， 海内存知已，后天，皇后" | cconv -f utf-8 -t utf8-tw
+記憶體， 海內存知已，後天，皇后 
