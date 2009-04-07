@@ -13,7 +13,7 @@ $ make install<br/>
 = Details =
 
 Base usage:
-Usage: iconv [OPTION...] [FILE]
+Usage: iconv ［OPTION...］ ［FILE］
 Convert encoding of given files from one encoding to another.
 
  Input/Output format specification:
