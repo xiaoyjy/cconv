@@ -11,7 +11,6 @@ http://www.gnu.org/software/libiconv/documentation/libiconv/iconv.1.html
 
 = 安装 =
 到 http://code.google.com/p/cconv/downloads/list 下载最新的源代码文件
-
 {{{
 $tar zxvf cconv-x.x.x.tar.gz
 $cd cconv-x.x.x
@@ -21,8 +20,37 @@ $ make install
 }}}
 
 = 使用 =
-
 {{{
-$ echo "内存， 海内存知已，后天，皇后" | cconv -f utf-8 -t utf8-tw
-記憶體， 海內存知已，後天，皇后 
+$ echo "内存， 海内存知己，后天，皇后，街头发钱" | cconv -f utf-8 -t utf8-tw
+記憶體， 海內存知己，後天，皇后，街頭發錢
 }}}
+
+= php扩展模块的安装 =
+值得注意的是. php扩展模块依赖于二进制版本的动态链接库，若安装扩展模块，请先安装二进制版本, 确认ldconfig -p能够找到libcconv.so 以及cconv.h头文件能被找到.
+{{{
+$tar zxvf cconv-php-x.x.x.tar.gz
+$cd cconv-php-x.x.x
+$phpize
+$./configure
+$make
+$sudo make install
+
+在php.ini中增加一行:
+extension=cconv.so
+
+<?php
+$str = "街头发钱；\n在专访中，姚明妙语连珠，透露NBA球员...\n";
+echo cconv("utf-8", "utf8-tw", $str);
+?>
+output:
+街頭發錢；
+在專訪中，姚明妙語連珠，透露NBA球員...
+}}}
+
+
+目前还有一些词语对照表需要整理
+
+对于扩展模块，现在只做了php的， 现在计划陆续推出python perl的。
+只是没有太多精力花在支持windows方面,如有兴趣朋友愿意帮忙我将不胜感激。
+
+我的msn：xiaoyjy@hotmail.com
