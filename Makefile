@@ -36,14 +36,14 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = i686-pc-linux-gnu
-ACLOCAL = ${SHELL} /home/jianyu/Private/repository/project/trunk/tools/cconv/trunk/missing --run aclocal-1.7
+ACLOCAL = ${SHELL} /home/jianyu/Private/repository/cconv/trunk/missing --run aclocal-1.7
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/jianyu/Private/repository/project/trunk/tools/cconv/trunk/missing --run tar
+AMTAR = ${SHELL} /home/jianyu/Private/repository/cconv/trunk/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/jianyu/Private/repository/project/trunk/tools/cconv/trunk/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/jianyu/Private/repository/project/trunk/tools/cconv/trunk/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/jianyu/Private/repository/project/trunk/tools/cconv/trunk/missing --run automake-1.7
+AUTOCONF = ${SHELL} /home/jianyu/Private/repository/cconv/trunk/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/jianyu/Private/repository/cconv/trunk/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/jianyu/Private/repository/cconv/trunk/missing --run automake-1.7
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=none
@@ -80,7 +80,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/jianyu/Private/repository/project/trunk/tools/cconv/trunk/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/jianyu/Private/repository/cconv/trunk/missing --run makeinfo
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
@@ -91,16 +91,16 @@ OTOOL64 =
 PACKAGE = cconv
 PACKAGE_BUGREPORT = reg256@sina.com.cn
 PACKAGE_NAME = cconv
-PACKAGE_STRING = cconv 0.5.1
+PACKAGE_STRING = cconv 0.5.2
 PACKAGE_TARNAME = cconv
-PACKAGE_VERSION = 0.5.1
+PACKAGE_VERSION = 0.5.2
 PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = strip
-VERSION = 0.5.1
+VERSION = 0.5.2
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -130,7 +130,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = /home/jianyu/Private/repository/project/trunk/tools/cconv/trunk/install-sh
+install_sh = /home/jianyu/Private/repository/cconv/trunk/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -148,9 +148,10 @@ sysconfdir = ${prefix}/etc
 target_alias = 
 AUTOMAKE_OPTIONS = no-dependencies
 
-EXTRA_DIST = cconv_table.h cconv_table.cc
+EXTRA_DIST = cconv_table.h cconv_table.cc m4
 
 AC_CFLAGS = -Wall  -DLinux
+ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = cconv
 cconv_SOURCES = cconv.c main.c
@@ -197,7 +198,7 @@ HEADERS = $(include_HEADERS)
 DIST_COMMON = README $(include_HEADERS) $(srcdir)/Makefile.in \
 	$(srcdir)/configure AUTHORS COPYING ChangeLog INSTALL \
 	Makefile.am NEWS aclocal.m4 compile config.guess config.h.in \
-	config.sub configure configure.in install-sh ltmain.sh missing \
+	config.sub configure configure.ac install-sh ltmain.sh missing \
 	mkinstalldirs
 SOURCES = $(libcconv_la_SOURCES) $(cconv_SOURCES)
 
@@ -209,7 +210,7 @@ all: config.h
 
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno
-$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.ac $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --gnu  Makefile
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
@@ -217,10 +218,10 @@ Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 
 $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
-$(srcdir)/configure:  $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+$(srcdir)/configure:  $(srcdir)/configure.ac $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-$(ACLOCAL_M4):  configure.in 
+$(ACLOCAL_M4):  configure.ac m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
@@ -233,7 +234,7 @@ stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
 
-$(srcdir)/config.h.in:  $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/config.h.in:  $(top_srcdir)/configure.ac $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOHEADER)
 	touch $(srcdir)/config.h.in
 
