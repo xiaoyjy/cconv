@@ -1,4 +1,4 @@
-use 5.010000;
+use 5.005000;
 use ExtUtils::MakeMaker;
 
 my $ccvon_dir = "/usr/local/";
