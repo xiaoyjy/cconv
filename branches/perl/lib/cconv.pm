@@ -1,6 +1,6 @@
 package cconv;
 
-use 5.010000;
+use 5.005000;
 use strict;
 use warnings;
 use Carp;
@@ -27,7 +27,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = 'perl-0.5.1';
+our $VERSION = 'perl-0.6.1';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
