@@ -1,0 +1,9 @@
+==== Changlog ====
+
+-- 0.5.2
+	Add AC_CONFIG_MACRO_DIR([m4]) to fix complie error on CentOS 4.X
+
+-- 0.5.1
+
+-- 0.5.-
+
