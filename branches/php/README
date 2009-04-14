@@ -1,0 +1,6 @@
+======= INSTALL =======
+
+You need install cconv-0.5.1 or later first.
+
+make sure libcconv.so can be found by ldconfig and cconv.h include path in CFLAGS.
+
