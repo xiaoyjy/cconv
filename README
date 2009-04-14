@@ -1,40 +1,40 @@
-=== Introduction ===
+cconv version 0.01
+==================
 
-A iconv based simplified-traditional chinese conversion tool
+The README is used to introduce the module and provide instructions on
+how to install the module, any machine dependencies it may have (for
+example C compilers and installed libraries) and any other information
+that should be provided before the module is installed.
 
-iconv is a open source international text conversion tool, if you do not know iconv, go to http://www.gnu.org/software/libiconv/#introduction to learn more.
+A README file is required for CPAN modules since CPAN extracts the
+README file from a module distribution so that people browsing the
+archive can use it get an idea of the modules uses. It is usually a
+good idea to provide version information here so that people can
+decide whether fixes for the module are worth downloading.
 
-As usual for GNU packages:
+INSTALLATION
 
-$ ./configure --prefix=/usr/local
-$ make
-$ make install
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  blah blah blah
+
+COPYRIGHT AND LICENCE
+
+Put the correct copyright and licence information here.
+
+Copyright (C) 2009 by jianyu
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.10.0 or,
+at your option, any later version of Perl 5 you may have available.
 
 
-=== Details ===
-
-Base usage:
-Usage: iconv [OPTION...] [FILE]
-Convert encoding of given files from one encoding to another.
-
- Input/Output format specification:
-  -f, --from-code=NAME       encoding of original text
-  -t, --to-code=NAME         encoding for output
-
- Information:
-  -l, --list                 list all known coded character sets
-
- Output control:
-  -o, --output=FILE          output file
-  -?, --help                 Give this help list
-      --usage                Give a short usage message
-  -V, --version              Print program version
-
-Example:
-$ echo "内存， 海内存知已，后天，皇后" | cconv -f utf-8 -t utf8-tw
-記憶體， 海內存知已，後天，皇后
-
-Copyright:
-All the source files and header files are under LGPL.
-
-The cconv program is under GPL.  
