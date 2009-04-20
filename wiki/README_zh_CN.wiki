@@ -54,3 +54,7 @@ output:
 只是没有太多精力花在支持windows方面,如有兴趣朋友愿意帮忙我将不胜感激。
 
 我的msn：xiaoyjy@hotmail.com
+
+cconv 的相关接口文档将在我的个人网站
+http://www.yyyun.com/topics/cconv
+中公布。
