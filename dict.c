@@ -52,6 +52,7 @@ int dict_load(const char *f_dict, language_zh_map **f_buf, int *f_size) {
 printf("size in file `%s': %d\n", f_dict, size);
         if (ret == 0) {
             fclose(fp);
+            free(line);
             return 0;
         }
     }
@@ -88,6 +89,7 @@ printf("size in file `%s': %d\n", f_dict, size);
         load = ++i;
     }
 
+    free(line);
     fclose(fp);
     *f_buf = buf;
     *f_size = size;
@@ -139,7 +141,13 @@ void dict_test(language_zh_map **f_dict, int f_size) {
     }
 }
 
-int dict_init(language_zh_map **f_dict) {
+#ifdef _DEBUG
+language_zh_map **f_dict = &g_dict;
+int main(int argc, char* argv[])
+#else
+int dict_init(language_zh_map **f_dict)
+#endif
+{
     char *HOME;
     if (HOME = getenv("HOME"))
         printf("HOME=%s\n", HOME);
@@ -176,7 +184,9 @@ printf("dict_load - size: %d\n", size);
         free(dictionary);
     }
 
-//    dict_test(*f_dict, size);
+#ifdef _DEBUG
+    dict_test(f_dict, size);
+#endif
     closedir(dp);
     free(dir);
     return size;
