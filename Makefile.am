@@ -6,7 +6,7 @@ AC_CFLAGS = -Wall @ICONV_INCLUDES@ @OS_TYPE@
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS  = cconv
-cconv_SOURCES = cconv.c main.c
+cconv_SOURCES = cconv.c dict.c main.c
 cconv_CFLAGS  = ${AC_CFLAGS}
 cconv_LDFLAGS = @ICONV_LIBS@
 
