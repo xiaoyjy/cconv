@@ -11,10 +11,10 @@ language_zh_map *g_dict = NULL;
 void dict_append(language_zh_map **f_dst, language_zh_map *f_src, int f_size);
 
 /**
- * detect file extension 
+ * check whether file extension of the 'f_filename' is '.dic'.
  *
- * @argv1   filename
- * @ret     non-zero if the file extension is ".dic", otherwise zero.
+ * the value returned are 'flase' if the 'f_filename' falls into the tested
+ * class, and 'true' value if not.
  */
 int is_dict(const char *f_filename) {
     int ret = 0;
@@ -27,11 +27,11 @@ int is_dict(const char *f_filename) {
 }
 
 /**
- * load user dictionary
+ * load words in user dictionary file whose name is the string pointed to by
+ * 'f_dict' into the buffer pointed to by 'f_buf', 'f_size' is passed to
+ * indicate the size of the buffer.
  *
- * @argv1   dictionary filename
- * @argv2   
- * @ret     number of words in the dictionary has been loaded
+ * returns the number of word in 'f_dict'.
  */
 int dict_load(const char *f_dict, language_zh_map **f_buf, int *f_size) {
     FILE *fp = fopen(f_dict, "r");
@@ -49,8 +49,7 @@ int dict_load(const char *f_dict, language_zh_map **f_buf, int *f_size) {
 #endif
     {
         int ret = sscanf(line, "%d\n", &size);
-printf("size in file `%s': %d\n", f_dict, size);
-        if (ret == 0) {
+        if (ret == 0 || size <= 0){
             fclose(fp);
             free(line);
             return 0;
@@ -59,6 +58,7 @@ printf("size in file `%s': %d\n", f_dict, size);
 
     size += *f_size;
     language_zh_map* buf = (language_zh_map*)malloc(sizeof(language_zh_map) * size);
+    bzero((void*)buf, sizeof(language_zh_map) * size);
     if (*f_size > 0) {
         dict_append(&buf, *f_buf, *f_size);
         dict_unload(f_buf, *f_size);
@@ -70,9 +70,9 @@ printf("size in file `%s': %d\n", f_dict, size);
     int load = 0;
     int i;
 #ifdef _GNU_SOURCE
-    for (i = *f_size; getline(&line, &length, fp) != -1; )
+    for (i = *f_size; (i < size) && (getline(&line, &length, fp) != -1); )
 #else
-    for (i = *f_size; fgets(line, length, fp); )
+    for (i = *f_size; (i < size) && fgets(line, length, fp); )
 #endif
     {
         int ret = sscanf(line, "{\"%[^\"]\", \"%[^\"]\", %d}\n", key, val, &cond);
@@ -80,8 +80,8 @@ printf("size in file `%s': %d\n", f_dict, size);
             continue;
         }
 
-        buf[i].key = (char*)malloc(sizeof(char) * strlen(key));
-        buf[i].val = (char*)malloc(sizeof(char) * strlen(val));
+        buf[i].key = (char*)malloc(sizeof(char) * (strlen(key) + 1));
+        buf[i].val = (char*)malloc(sizeof(char) * (strlen(val) + 1));
         strcpy(buf[i].key, key);
         strcpy(buf[i].val, val);
         buf[i].cond = cond;
@@ -96,6 +96,11 @@ printf("size in file `%s': %d\n", f_dict, size);
     return load;
 }
 
+/**
+ * appends the 'f_src' buffer to the 'f_dst' buffer, and the 'f_dst' buffer
+ * must have enough space for the result. it will use at most 'f_size' words
+ * from 'f_src'.
+ */
 void dict_append(language_zh_map **f_dst, language_zh_map *f_src, int f_size) {
     language_zh_map *dst = *f_dst;
 
@@ -105,14 +110,21 @@ void dict_append(language_zh_map **f_dst, language_zh_map *f_src, int f_size) {
 
     int i;
     for (i = 0; i < f_size; ++i) {
-        dst[i].key = (char*)malloc(sizeof(char) * strlen(f_src[i].key));
-        dst[i].val = (char*)malloc(sizeof(char) * strlen(f_src[i].val));
+        if (!f_src[i].key || !f_src[i].val)
+            continue;
+
+        dst[i].key = (char*)malloc(sizeof(char) * (strlen(f_src[i].key) + 1));
+        dst[i].val = (char*)malloc(sizeof(char) * (strlen(f_src[i].val) + 1));
         strcpy(dst[i].key, f_src[i].key);
         strcpy(dst[i].val, f_src[i].val);
         dst[i].cond = f_src[i].cond;
     }
 }
 
+/**
+ * free the memory space pointed to by 'f_dict', 'f_size' is passed to indicate
+ * the size of the buffer.
+ */
 void dict_unload(language_zh_map **f_dict, int f_size) {
     language_zh_map *dict = *f_dict;
 
@@ -123,8 +135,8 @@ void dict_unload(language_zh_map **f_dict, int f_size) {
     int i;
     for (i = 0; i < f_size; ++i) {
         p = dict[i];
-        free(p.key); p.key = NULL;
-        free(p.val); p.val = NULL;
+        if (p.key) { free(p.key); p.key = NULL; }
+        if (p.val) { free(p.val); p.val = NULL; }
     }
 
     free(dict);
@@ -164,6 +176,7 @@ int dict_init(language_zh_map **f_dict)
     struct dirent *filename;
     if (!(dp = opendir(dir))) {
         printf("null: %s\n", dir);
+        free(dir);
         return 0;
     }
 
@@ -179,8 +192,7 @@ int dict_init(language_zh_map **f_dict)
         dictionary = (char*)malloc(sizeof(char) * (strlen(dir) + strlen(filename->d_name) + 1));
         sprintf(dictionary, "%s%s", dir, filename->d_name);
 #endif
-        size = dict_load(dictionary, f_dict, &size);
-printf("dict_load - size: %d\n", size);
+        int load = dict_load(dictionary, f_dict, &size);
         free(dictionary);
     }
 
