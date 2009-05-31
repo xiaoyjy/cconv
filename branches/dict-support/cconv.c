@@ -29,8 +29,6 @@
 #define CCONV_CODE_UTW      "UTF8-TW"
 #define CCONV_CODE_UHK      "UTF8-HK"
 
-extern language_zh_map *g_dict;
-
 typedef enum cconv_type
 {
         CCONV_ERROR = -1,
@@ -53,9 +51,9 @@ typedef struct cconv_struct
 }
 cconv_struct;
 
-static int find_keyword(cconv_type cd, language_zh_map *f_map, const char* inbytes, size_t* length, int begin, int end);
+static int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end);
 
-static int binary_find (cconv_type cd, language_zh_map *f_map, const char* inbytes, size_t* length, int begin, int end);
+static int binary_find (cconv_type cd, const char* inbytes, size_t* length, int begin, int end);
 
 static int match_cond  (const char* mc, const char* inbytes);
 
@@ -267,26 +265,11 @@ size_t cconv(cconv_t cd,
 
 		if(i_proc > 1)
 		{
-            printf("0. %p\n", map_uni_s2t);
-            printf("1. %p\n", &map_uni_s2t);
-			i_offset = find_keyword(CCONV_UTF_S_TO_T, map_uni_s2t, ps_inbuf, &i_proc, 0, map_uni_s2t_size - 1);
+			i_offset = find_keyword(CCONV_UTF_S_TO_T, ps_inbuf, &i_proc, 0, map_uni_s2t_size - 1);
 			if(i_offset != -1)
 			{
 				o_proc = strlen(map_uni_s2t[i_offset].val);
 				memcpy(ps_outbuf + i_conv, map_uni_s2t[i_offset].val, o_proc);
-				ps_inbuf	+= i_proc;
-				(*inbytesleft)  -= i_proc;
-				(*outbytesleft) += o_proc;
-				i_conv += o_proc;
-				continue;
-			}
-
-			i_offset = find_keyword(CCONV_UTF_S_TO_T, g_dict, ps_inbuf, &i_proc, 0, 4 - 1);
-			if(i_offset != -1)
-			{
-                printf("123\n");
-				o_proc = strlen(g_dict[i_offset].val);
-				memcpy(ps_outbuf + i_conv, g_dict[i_offset].val, o_proc);
 				ps_inbuf	+= i_proc;
 				(*inbytesleft)  -= i_proc;
 				(*outbytesleft) += o_proc;
@@ -318,7 +301,7 @@ size_t cconv(cconv_t cd,
 
 		if(i_proc > 1)
 		{
-			i_offset = find_keyword(CCONV_UTF_T_TO_S, map_uni_t2s, ps_inbuf, &i_proc, 0, map_uni_t2s_size - 1);
+			i_offset = find_keyword(CCONV_UTF_T_TO_S, ps_inbuf, &i_proc, 0, map_uni_t2s_size - 1);
 			if(i_offset != -1)
 			{
 				o_proc = strlen(map_uni_t2s[i_offset].val);
@@ -381,16 +364,15 @@ int cconv_close( cconv_t cd )
 /* }}} */
 
 
-/* {{{ int binary_find(cconv_t cd, language_zh_map *f_map, const char* inbytes, int length, int begin, int end) */
-int binary_find(cconv_type cd, language_zh_map *f_map, const char* inbytes, size_t* length, int begin, int end)
+/* {{{ int binary_find(cconv_t cd, const char* inbytes, int length, int begin, int end) */
+int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, int end)
 {
-    printf("4. %p\n", f_map);
-	language_zh_map *map = f_map;
-    printf("5. %p\n", map);
+	language_zh_map *map;
 	int middle, last, next_fix = 0;
 	int ret, offset = -1;
 	size_t width, wwidth, nwidth;
 
+	map = (cd == CCONV_UTF_S_TO_T) ? map_uni_s2t : map_uni_t2s;
 	middle = (begin + end) >> 1;
 	width  = *length;
 	last   = end;
@@ -411,7 +393,7 @@ int binary_find(cconv_type cd, language_zh_map *f_map, const char* inbytes, size
 				if(nwidth != 0 && memcmp(map[middle].key, inbytes, wwidth) <= 0)
 				{
 					while (nwidth != 0
-						&& (offset = binary_find(cd, f_map, inbytes, &wwidth, offset, end)) != -1)
+						&& (offset = binary_find(cd, inbytes, &wwidth, offset, end)) != -1)
 					{
 						if(wwidth == strlen(map[offset].key))
 							return offset;
@@ -444,14 +426,11 @@ int binary_find(cconv_type cd, language_zh_map *f_map, const char* inbytes, size
 }
 /* }}} */
 
-int find_keyword(cconv_type cd, language_zh_map *f_map, const char* inbytes, size_t* length, int begin, int end)
+int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end)
 {
-    printf("2. %p\n", f_map);
-    language_zh_map *map = f_map;
-    printf("3. %p\n", map);
 	int location, offset;
 	size_t wwidth, nwidth;
-	if((offset = binary_find(cd, f_map, inbytes, length, begin, end)) == -1)
+	if((offset = binary_find(cd, inbytes, length, begin, end)) == -1)
 		return -1;
 
 	wwidth = *length;
@@ -461,26 +440,26 @@ int find_keyword(cconv_type cd, language_zh_map *f_map, const char* inbytes, siz
 		nwidth   = utf_char_width((const unsigned char*)(inbytes + wwidth));
 		wwidth  += nwidth;
 	}
-	while(nwidth != 0 && (offset = binary_find(cd, f_map, inbytes, &wwidth, offset, end)) != -1);
+	while(nwidth != 0 && (offset = binary_find(cd, inbytes, &wwidth, offset, end)) != -1);
 
 	/* extention word fix. */
 	if(cd == CCONV_UTF_S_TO_T
-		&& map[location].cond != -1
-		&& map_uni_cond[map[location].cond].st_ma != NULL
+		&& map_uni_s2t[location].cond != -1
+		&& map_uni_cond[map_uni_s2t[location].cond].st_ma != NULL
 		&& match_cond(
-			map_uni_cond[map[location].cond].st_ma,
-			inbytes + strlen(map[location].key))
+			map_uni_cond[map_uni_s2t[location].cond].st_ma,
+			inbytes + strlen(map_uni_s2t[location].key))
 	)
 	{
 		return -1;
 	}
 
 	if(cd == CCONV_UTF_T_TO_S
-		&& map[location].cond != -1
-		&& map_uni_cond[map[location].cond].ts_ma != NULL
+		&& map_uni_t2s[location].cond != -1
+		&& map_uni_cond[map_uni_t2s[location].cond].ts_ma != NULL
 		&& match_cond(
-			map_uni_cond[map[location].cond].ts_ma,
-			inbytes + strlen(map[location].key))
+			map_uni_cond[map_uni_t2s[location].cond].ts_ma,
+			inbytes + strlen(map_uni_t2s[location].key))
 	)
 	{
 		return -1;

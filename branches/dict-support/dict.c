@@ -13,7 +13,7 @@ void dict_append(language_zh_map **f_dst, language_zh_map *f_src, int f_size);
 /**
  * check whether file extension of the 'f_filename' is '.dic'.
  *
- * the value returned are 'flase' if the 'f_filename' falls into the tested
+ * the value returned are 'false' if the 'f_filename' falls into the tested
  * class, and 'true' value if not.
  */
 int is_dict(const char *f_filename) {
@@ -120,6 +120,14 @@ void dict_append(language_zh_map **f_dst, language_zh_map *f_src, int f_size) {
         dst[i].cond = f_src[i].cond;
     }
 }
+
+/**
+ *
+ */
+void dict_find() {
+
+}
+
 
 /**
  * free the memory space pointed to by 'f_dict', 'f_size' is passed to indicate
