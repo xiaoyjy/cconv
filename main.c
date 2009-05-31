@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-    int word = dict_init(&g_dict);
+	g_dict_size = dict_init(&g_dict);
 	if((conv = cconv_open(tocode, fromcode)) == (cconv_t)(-1)) {
 		printf("Not support character code set.\n");
 		return 0;
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 	free(inbuf );
 	free(outbuf);
 	cconv_close(conv);
-    dict_unload(&g_dict, word);
+	dict_unload(&g_dict, g_dict_size);
 
 	if(fp_out != stdout) fclose(fp_out);
 	if(fp_in  != stdin ) fclose(fp_in );
