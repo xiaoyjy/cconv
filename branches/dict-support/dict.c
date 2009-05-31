@@ -8,7 +8,9 @@
 #include "dict.h"
 
 language_zh_map *g_dict = NULL;
+int g_dict_size = 0;
 void dict_append(language_zh_map **f_dst, language_zh_map *f_src, int f_size);
+extern int utf_char_width(const unsigned char* w);
 
 /**
  * check whether file extension of the 'f_filename' is '.dic'.
@@ -122,12 +124,54 @@ void dict_append(language_zh_map **f_dst, language_zh_map *f_src, int f_size) {
 }
 
 /**
+ * finds the first occurrence of the string 'inbytes' in the user dictionary
+ * buffer 'g_dict', at most 'length' of sequence of characters to search for.
  *
+ * return subscript of target if found; otherwise -1.
  */
-void dict_find() {
+int dict_find(const char* inbytes, size_t* length, int begin, int end, int f_skip) {
+    size_t wwidth, nwidth;
+    int next_fix = 0;
+    int i = 0;
+    int j = 0;
 
+    for (i = begin; i < end; ++i) {
+        if (i == f_skip)
+            continue;
+
+        if (!g_dict[i].key || !g_dict[i].val)
+            continue;
+
+		int ret = memcmp(g_dict[i].key, inbytes, *length);
+		if (ret != 0)
+            continue;
+
+        if (*length == strlen(g_dict[i].key)) {
+            return i;
+        }
+
+        /* XXX  not clear - word key */
+        if (next_fix == 0) {
+            nwidth = utf_char_width((const unsigned char*)(inbytes + *length));
+            wwidth = *length + nwidth;
+            if (nwidth != 0 && memcmp(g_dict[i].key, inbytes, wwidth) <= 0) {
+                while (nwidth != 0 && (j = dict_find(inbytes, &wwidth, begin, end, -1)) != -1) {
+                    if (wwidth == strlen(g_dict[j].key)) {
+                        *length = wwidth;
+                        return j;
+                    }
+
+                    nwidth = utf_char_width((const unsigned char*)inbytes + *length);
+                    wwidth += nwidth;
+                    i = j;
+                }
+                next_fix = 1;
+            }
+        }
+    }
+
+    return -1;
 }
-
 
 /**
  * free the memory space pointed to by 'f_dict', 'f_size' is passed to indicate
@@ -168,9 +212,9 @@ int main(int argc, char* argv[])
 int dict_init(language_zh_map **f_dict)
 #endif
 {
-    char *HOME;
-    if (HOME = getenv("HOME"))
-        printf("HOME=%s\n", HOME);
+    char *HOME = getenv("HOME");
+    if (!HOME)
+        return 0;
 
     char *dir;
 #ifdef _GNU_SOURCE
@@ -183,7 +227,6 @@ int dict_init(language_zh_map **f_dict)
     DIR *dp;
     struct dirent *filename;
     if (!(dp = opendir(dir))) {
-        printf("null: %s\n", dir);
         free(dir);
         return 0;
     }

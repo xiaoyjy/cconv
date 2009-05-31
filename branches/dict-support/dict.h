@@ -20,7 +20,9 @@ typedef struct {
 } language_zh_map;
 int dict_init(language_zh_map **f_dict);
 void dict_unload(language_zh_map **f_dict, int f_size);
+int dict_find(const char* inbytes, size_t* length, int begin, int end, int f_skip);
 extern language_zh_map *g_dict;
+extern int g_dict_size;
 
 #endif
 

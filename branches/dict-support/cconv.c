@@ -57,8 +57,10 @@ static int binary_find (cconv_type cd, const char* inbytes, size_t* length, int 
 
 static int match_cond  (const char* mc, const char* inbytes);
 
-static int utf_char_width(const unsigned char* w);
+int utf_char_width(const unsigned char* w);
 
+extern int g_dict_size;
+extern language_zh_map *g_dict;
 
 /* {{{ cconv_t cconv_open(const char* tocode, const char* fromcode) */
 /**
@@ -265,6 +267,17 @@ size_t cconv(cconv_t cd,
 
 		if(i_proc > 1)
 		{
+			i_offset = dict_find(ps_inbuf, &i_proc, 0, g_dict_size, -1);
+			if(i_offset != -1)
+			{
+				o_proc = strlen(g_dict[i_offset].val);
+				memcpy(ps_outbuf + i_conv, g_dict[i_offset].val, o_proc);
+				ps_inbuf	+= i_proc;
+				(*inbytesleft)  -= i_proc;
+				(*outbytesleft) += o_proc;
+				i_conv += o_proc;
+				continue;
+			}
 			i_offset = find_keyword(CCONV_UTF_S_TO_T, ps_inbuf, &i_proc, 0, map_uni_s2t_size - 1);
 			if(i_offset != -1)
 			{
