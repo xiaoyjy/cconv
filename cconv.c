@@ -55,7 +55,7 @@ static int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int 
 
 static int binary_find (cconv_type cd, const char* inbytes, size_t* length, int begin, int end);
 
-static int match_cond  (const char* mc, const char* inbytes);
+static int match_cond  (const char* mc, const char* inbytes, int pre);
 
 static int utf_char_width(const unsigned char* w);
 
@@ -445,32 +445,36 @@ int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, 
 	/* extention word fix. */
 	if(cd == CCONV_UTF_S_TO_T
 		&& map_uni_s2t[location].cond != -1
-		&& map_uni_cond[map_uni_s2t[location].cond].st_ma != NULL
-		&& match_cond(
-			map_uni_cond[map_uni_s2t[location].cond].st_ma,
-			inbytes + strlen(map_uni_s2t[location].key))
-	)
-	{
+		&& ((map_uni_cond[map_uni_s2t[location].cond].st_ma != NULL
+			&& match_cond(
+				map_uni_cond[map_uni_s2t[location].cond].st_ma,
+				inbytes + strlen(map_uni_s2t[location].key),  0))
+		    || (map_uni_cond[map_uni_s2t[location].cond].st_mb != NULL
+			&& match_cond(map_uni_cond[map_uni_s2t[location].cond].st_mb, inbytes, 1)))
+	){
+		*length = utf_char_width((const unsigned char*)inbytes);
 		return -1;
 	}
 
 	if(cd == CCONV_UTF_T_TO_S
 		&& map_uni_t2s[location].cond != -1
-		&& map_uni_cond[map_uni_t2s[location].cond].ts_ma != NULL
-		&& match_cond(
-			map_uni_cond[map_uni_t2s[location].cond].ts_ma,
-			inbytes + strlen(map_uni_t2s[location].key))
-	)
-	{
+		&& ((map_uni_cond[map_uni_t2s[location].cond].ts_ma != NULL
+		       && match_cond(
+				map_uni_cond[map_uni_t2s[location].cond].ts_ma,
+				inbytes + strlen(map_uni_t2s[location].key), 0))
+		   || (map_uni_cond[map_uni_t2s[location].cond].ts_mb != NULL
+		       && match_cond(map_uni_cond[map_uni_t2s[location].cond].ts_mb, inbytes, 1)))
+	){
+		*length = utf_char_width((const unsigned char*)inbytes);
 		return -1;
 	}
 
 	return location;
 }
 
-int match_cond(const char* mc, const char* inbytes)
+int match_cond(const char* mc, const char* inbytes, int pre)
 {
-	int size;
+	int size, prefix;
 	char *m_one, *p;
 
 	size = strlen(mc);
@@ -481,8 +485,10 @@ int match_cond(const char* mc, const char* inbytes)
 	m_one = strtok(p, ",");
 	while(m_one)
 	{
+		prefix = (pre == 1) ? strlen(m_one) : 0;
+
 		if(strlen(inbytes) >= strlen(m_one)
-			&& memcmp(inbytes, m_one, strlen(m_one)) == 0)
+			&& memcmp(inbytes - prefix, m_one, strlen(m_one)) == 0)
 		{
 			free(p);
 			return 1;
