@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.13)
-AC_INIT(cconv, 0.5.2, reg256@sina.com.cn)
-AM_INIT_AUTOMAKE(cconv, 0.5.2)
+AC_INIT(cconv, 0.5.3, xiaoyjy@gmail.com)
+AM_INIT_AUTOMAKE(cconv, 0.5.3)
 AC_CONFIG_SRCDIR([cconv.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
