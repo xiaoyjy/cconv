@@ -154,7 +154,7 @@ AC_CFLAGS = -Wall  -DLinux
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = cconv
-cconv_SOURCES = cconv.c main.c
+cconv_SOURCES = cconv.c main.c unicode.c
 cconv_CFLAGS = ${AC_CFLAGS}
 cconv_LDFLAGS = 
 
@@ -177,7 +177,8 @@ libcconv_la_OBJECTS = $(am_libcconv_la_OBJECTS)
 bin_PROGRAMS = cconv$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-am_cconv_OBJECTS = cconv-cconv.$(OBJEXT) cconv-main.$(OBJEXT)
+am_cconv_OBJECTS = cconv-cconv.$(OBJEXT) cconv-main.$(OBJEXT) \
+	cconv-unicode.$(OBJEXT)
 cconv_OBJECTS = $(am_cconv_OBJECTS)
 cconv_LDADD = $(LDADD)
 cconv_DEPENDENCIES =
@@ -344,6 +345,15 @@ cconv-main.obj: main.c
 
 cconv-main.lo: main.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cconv_CFLAGS) $(CFLAGS) -c -o cconv-main.lo `test -f 'main.c' || echo '$(srcdir)/'`main.c
+
+cconv-unicode.o: unicode.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cconv_CFLAGS) $(CFLAGS) -c -o cconv-unicode.o `test -f 'unicode.c' || echo '$(srcdir)/'`unicode.c
+
+cconv-unicode.obj: unicode.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cconv_CFLAGS) $(CFLAGS) -c -o cconv-unicode.obj `if test -f 'unicode.c'; then $(CYGPATH_W) 'unicode.c'; else $(CYGPATH_W) '$(srcdir)/unicode.c'; fi`
+
+cconv-unicode.lo: unicode.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cconv_CFLAGS) $(CFLAGS) -c -o cconv-unicode.lo `test -f 'unicode.c' || echo '$(srcdir)/'`unicode.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

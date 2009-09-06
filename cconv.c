@@ -17,32 +17,11 @@
 
 #include "cconv.h"
 #include "cconv_table.h"
+#include "unicode.h"
 
 #ifdef HAVE_CONFIG_H
 	#include "config.h"
 #endif
-
-#define CCONV_CODE_UTF      "UTF-8"
-#define CCONV_CODE_GBK      "GBK"
-#define CCONV_CODE_BIG      "BIG5"
-#define CCONV_CODE_UCN      "UTF8-CN"
-#define CCONV_CODE_UTW      "UTF8-TW"
-#define CCONV_CODE_UHK      "UTF8-HK"
-
-typedef enum cconv_type
-{
-        CCONV_ERROR = -1,
-	CCONV_NULL  = 0,
-        CCONV_GBK_TO_BIG = 1,
-        CCONV_GBK_TO_UTT,
-        CCONV_BIG_TO_GBK,
-        CCONV_BIG_TO_UTS,
-        CCONV_UTF_S_TO_T,
-        CCONV_UTF_T_TO_S,
-	CCONV_UTF_TO_GBK,
-	CCONV_UTF_TO_BIG
-}
-cconv_type;
 
 typedef struct cconv_struct
 {
@@ -51,14 +30,36 @@ typedef struct cconv_struct
 }
 cconv_struct;
 
-static int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end);
+static int find_keyword(
+	cconv_type  cd       ,
+	const char* inbytes  ,
+	size_t*     length   ,
+	int         begin    ,
+	int         end      ,
+	const int   i_offset
+);
 
-static int binary_find (cconv_type cd, const char* inbytes, size_t* length, int begin, int end);
+static int binary_find(
+	cconv_type  cd       ,
+	const char* inbytes  ,
+	size_t*     length   ,
+	int         begin    ,
+	int         end
+);
 
-static int match_cond  (const char* mc, const char* inbytes, int pre);
+static int match_cond(
+	const factor_zh_map* cond   ,
+	const char*          str    ,
+	int                  klen   ,
+	const int            i_offset
+);
 
-static int utf_char_width(const unsigned char* w);
-
+static int match_real_cond(
+	const char* mc   ,
+	const char* str  ,
+	int         head ,
+	const int   i_offset
+);
 
 /* {{{ cconv_t cconv_open(const char* tocode, const char* fromcode) */
 /**
@@ -172,6 +173,7 @@ cconv_t cconv_open(const char* tocode, const char* fromcode)
 	cd_struct->iconv_cd = NULL; \
 	free(ps_midbuf);
 
+#define const_bin_c_str(x) (const unsigned char*)(x)
 
 /* {{{ size_t cconv() */
 /**
@@ -196,7 +198,8 @@ size_t cconv(cconv_t cd,
 	size_t  i_conv	= 0;
 	size_t  i_proc	= 0;
 	size_t  o_proc  = 0;
-	int     i_offset  = 0;
+	int     i_offset  = 0,
+		index = 0;
 #ifdef FreeBSD
 	const char *ps_inbuf  = NULL;
 #else
@@ -259,21 +262,22 @@ size_t cconv(cconv_t cd,
 	
 	case CCONV_UTF_S_TO_T:
 	for (; (*inbytesleft) > 0 && (*outbytesleft) > 0; ) {
-		i_proc = utf_char_width((unsigned char*)ps_inbuf);
+		i_proc = utf_char_width(const_bin_c_str(ps_inbuf));
 		if(i_proc > (*inbytesleft))
 			break;
 
 		if(i_proc > 1)
 		{
-			i_offset = find_keyword(CCONV_UTF_S_TO_T, ps_inbuf, &i_proc, 0, map_uni_s2t_size - 1);
-			if(i_offset != -1)
+			index = find_keyword(CCONV_UTF_S_TO_T, ps_inbuf, &i_proc, 0, s2t_size() - 1, i_offset);
+			if(index != -1)
 			{
-				o_proc = strlen(map_uni_s2t[i_offset].val);
-				memcpy(ps_outbuf + i_conv, map_uni_s2t[i_offset].val, o_proc);
+				o_proc = strlen(s2t_val(index));
+				memcpy(ps_outbuf + i_conv, s2t_val(index), o_proc);
 				ps_inbuf	+= i_proc;
 				(*inbytesleft)  -= i_proc;
 				(*outbytesleft) += o_proc;
-				i_conv += o_proc;
+				i_conv          += o_proc;
+				i_offset         = (*inbuf) - ps_inbuf;
 				continue;
 			}
 		}
@@ -287,29 +291,32 @@ size_t cconv(cconv_t cd,
 		ps_inbuf	+= i_proc;
 		(*inbytesleft)  -= i_proc;
 		(*outbytesleft) += i_proc;
-		i_conv	  += i_proc;
+		i_conv	        += i_proc;
+		i_offset         = (*inbuf) - ps_inbuf;
 	} // for
+
 	*inbuf  = ps_inbuf;
 	*outbuf = ps_outbuf + i_conv;
 	return i_conv;
 
 	case CCONV_UTF_T_TO_S:
 	for (; (*inbytesleft) > 0 && (*outbytesleft) > 0; ) {
-		i_proc = utf_char_width((unsigned char*)ps_inbuf);
+		i_proc = utf_char_width(const_bin_c_str(ps_inbuf));
 		if(i_proc > (*inbytesleft))
 			break;
 
 		if(i_proc > 1)
 		{
-			i_offset = find_keyword(CCONV_UTF_T_TO_S, ps_inbuf, &i_proc, 0, map_uni_t2s_size - 1);
-			if(i_offset != -1)
+			index = find_keyword(CCONV_UTF_T_TO_S, ps_inbuf, &i_proc, 0, t2s_size() - 1, i_offset);
+			if(index != -1)
 			{
-				o_proc = strlen(map_uni_t2s[i_offset].val);
-				memcpy(ps_outbuf + i_conv, map_uni_t2s[i_offset].val, o_proc);
+				o_proc = strlen(t2s_val(index));
+				memcpy(ps_outbuf + i_conv, t2s_val(index), o_proc);
 				ps_inbuf	+= i_proc;
 				(*inbytesleft)  -= i_proc;
 				(*outbytesleft) += o_proc;
-				i_conv += o_proc;
+				i_conv          += o_proc;
+				i_offset         = (*inbuf) - ps_inbuf;
 				continue;
 			}
 		}
@@ -323,7 +330,8 @@ size_t cconv(cconv_t cd,
 		ps_inbuf	+= i_proc;
 		(*inbytesleft)  -= i_proc;
 		(*outbytesleft) += i_proc;
-		i_conv	  += i_proc;
+		i_conv          += i_proc;
+		i_offset         = (*inbuf) - ps_inbuf;
 	} // for
 	*inbuf  = ps_inbuf;
 	*outbuf = ps_outbuf + i_conv;
@@ -372,7 +380,7 @@ int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, i
 	int ret, offset = -1;
 	size_t width, wwidth, nwidth;
 
-	map = (cd == CCONV_UTF_S_TO_T) ? map_uni_s2t : map_uni_t2s;
+	map = get_zh_map(cd);
 	middle = (begin + end) >> 1;
 	width  = *length;
 	last   = end;
@@ -388,7 +396,7 @@ int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, i
 			/* word key */
 			if(next_fix == 0)
 			{
-				nwidth = utf_char_width((const unsigned char*)(inbytes + width));
+				nwidth = utf_char_width(const_bin_c_str(inbytes+width));
 				wwidth = width + nwidth;
 				if(nwidth != 0 && memcmp(map[middle].key, inbytes, wwidth) <= 0)
 				{
@@ -398,7 +406,7 @@ int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, i
 						if(wwidth == strlen(map[offset].key))
 							return offset;
 
-						nwidth = utf_char_width((const unsigned char*)inbytes + width);
+						nwidth = utf_char_width(const_bin_c_str(inbytes+width));
 						wwidth += nwidth;
 					}
 
@@ -426,55 +434,72 @@ int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, i
 }
 /* }}} */
 
-int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end)
+int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end, const int i_offset)
 {
 	int location, offset;
 	size_t wwidth, nwidth;
+
 	if((offset = binary_find(cd, inbytes, length, begin, end)) == -1)
 		return -1;
 
+	/* match the most accurate value */
 	wwidth = *length;
 	do{
 		location = offset;
 		*length  = wwidth;
-		nwidth   = utf_char_width((const unsigned char*)(inbytes + wwidth));
+		nwidth   = utf_char_width(const_bin_c_str(inbytes+wwidth));
 		wwidth  += nwidth;
 	}
 	while(nwidth != 0 && (offset = binary_find(cd, inbytes, &wwidth, offset, end)) != -1);
 
 	/* extention word fix. */
-	if(cd == CCONV_UTF_S_TO_T
-		&& map_uni_s2t[location].cond != -1
-		&& ((map_uni_cond[map_uni_s2t[location].cond].st_ma != NULL
-			&& match_cond(
-				map_uni_cond[map_uni_s2t[location].cond].st_ma,
-				inbytes + strlen(map_uni_s2t[location].key),  0))
-		    || (map_uni_cond[map_uni_s2t[location].cond].st_mb != NULL
-			&& match_cond(map_uni_cond[map_uni_s2t[location].cond].st_mb, inbytes, 1)))
-	){
-		*length = utf_char_width((const unsigned char*)inbytes);
-		return -1;
+	if(cd == CCONV_UTF_S_TO_T)
+	{
+		if(!match_cond(s2t_cond_ptr(location), inbytes, strlen(s2t_key(location)), i_offset))
+		{
+			*length = utf_char_width(const_bin_c_str(inbytes));
+			return -1;
+		}
 	}
 
-	if(cd == CCONV_UTF_T_TO_S
-		&& map_uni_t2s[location].cond != -1
-		&& ((map_uni_cond[map_uni_t2s[location].cond].ts_ma != NULL
-		       && match_cond(
-				map_uni_cond[map_uni_t2s[location].cond].ts_ma,
-				inbytes + strlen(map_uni_t2s[location].key), 0))
-		   || (map_uni_cond[map_uni_t2s[location].cond].ts_mb != NULL
-		       && match_cond(map_uni_cond[map_uni_t2s[location].cond].ts_mb, inbytes, 1)))
-	){
-		*length = utf_char_width((const unsigned char*)inbytes);
-		return -1;
+	/* extention word fix. t to s */
+	if(cd == CCONV_UTF_T_TO_S)
+	{
+		if(!match_cond(t2s_cond_ptr(location), inbytes, strlen(t2s_key(location)), i_offset))
+		{
+			*length = utf_char_width(const_bin_c_str(inbytes));
+			return -1;
+		}
 	}
 
 	return location;
 }
 
-int match_cond(const char* mc, const char* inbytes, int pre)
+int match_cond(const factor_zh_map *cond, const char* str, int klen, const int i_offset)
 {
-	int size, prefix;
+	const char* cond_str = NULL;
+	cond_str = get_cond_c_str(cond, n_ma);
+	if(cond_str && match_real_cond(cond_str, str + klen, 0, i_offset))
+		return 0;
+
+	cond_str = get_cond_c_str(cond, n_mb);
+	if(cond_str && match_real_cond(cond_str, str, 1, i_offset))
+		return 0;
+
+	cond_str = get_cond_c_str(cond, y_mb);
+	if(cond_str && !match_real_cond(cond_str, str, 1, i_offset))
+		return 0;
+	
+	cond_str = get_cond_c_str(cond, y_ma);
+	if(cond_str && !match_real_cond(cond_str, str + klen, 0, i_offset))
+		return 0;
+
+	return 1;
+}
+
+int match_real_cond(const char* mc, const char* str, int head, const int i_offset)
+{
+	int size;
 	char *m_one, *p;
 
 	size = strlen(mc);
@@ -485,30 +510,19 @@ int match_cond(const char* mc, const char* inbytes, int pre)
 	m_one = strtok(p, ",");
 	while(m_one)
 	{
-		prefix = (pre == 1) ? strlen(m_one) : 0;
-
-		if(strlen(inbytes) >= strlen(m_one)
-			&& memcmp(inbytes - prefix, m_one, strlen(m_one)) == 0)
-		{
+		if((head == 1 && i_offset >= strlen(m_one) &&
+			memcmp(str - strlen(m_one), m_one, strlen(m_one)) == 0) 
+		 ||(head == 0 && strlen(str) >= strlen(m_one) &&
+			memcmp(str, m_one, strlen(m_one)) == 0)
+		){
 			free(p);
 			return 1;
 		}
+
 		m_one = strtok(NULL, ",");
 	}
 
 	free(p);
 	return 0;
-}
-
-int utf_char_width(const unsigned char* w)
-{
-	if(w[0] < 0x80) return 1;
-	if(w[0] < 0xe0) return 2;
-	if(w[0] < 0xf0) return 3;
-	if(w[0] < 0xf8) return 4;
-	if(w[0] < 0xfc) return 5;
-	if(w[0] < 0xfe) return 6;
-
-	return -1;
 }
 
