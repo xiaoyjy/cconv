@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # libtool - Provide generalized library-building support services.
-# Generated automatically by config.status (cconv) 0.5.3
+# Generated automatically by config.status (cconv) 0.6.0
 # Libtool was configured on host laptop:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
@@ -234,10 +234,10 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3 /usr/lib64 /lib64 /usr/x86_64-pc-linux-gnu/lib"
+sys_lib_search_path_spec="/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 /usr/lib64 /lib64 /usr/x86_64-pc-linux-gnu/lib"
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/local/lib //usr/lib32/opengl/xorg-x11/lib //usr/lib64/opengl/xorg-x11/lib /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib64 /lib32 /usr/lib32 /usr/local/lib32 /usr/x86_64-pc-linux-gnu/lib /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3 /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/32 /usr/lib64/nspr /usr/lib64/nss /usr/kde/3.5/lib32 /usr/kde/3.5/lib64 /usr/kde/3.5/lib /usr/qt/3/lib /usr/qt/3/lib64 /usr/qt/3/lib32 /usr/games/lib /usr/games/lib64 /usr/games/lib32 "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/local/lib //usr/lib32/opengl/ati/lib //usr/lib64/opengl/ati/lib /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib64 /lib32 /usr/lib32 /usr/local/lib32 /usr/x86_64-pc-linux-gnu/lib /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/32 /usr/lib64/nspr /usr/lib64/nss /usr/lib64/xulrunner-1.9.1.2 /usr/kde/3.5/lib32 /usr/kde/3.5/lib64 /usr/kde/3.5/lib /usr/qt/3/lib /usr/qt/3/lib64 /usr/qt/3/lib32 /opt/xulrunner /usr/games/lib /usr/games/lib64 /usr/games/lib32 /usr/lib32/libstdc++-v3/ "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
@@ -9109,17 +9109,17 @@ file_list_spec=""
 hardcode_action=immediate
 
 # The directories searched by this compiler when creating a shared library.
-compiler_lib_search_dirs="/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3 /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3 /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../../../x86_64-pc-linux-gnu/lib /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../.."
+compiler_lib_search_dirs="/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../../../lib64 /lib/../lib64 /usr/lib/../lib64 /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../../../x86_64-pc-linux-gnu/lib /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../.."
 
 # Dependencies to place before and after the objects being linked to
 # create a shared library.
-predep_objects="/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../../../lib64/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/crtbeginS.o"
-postdep_objects="/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../../../lib64/crtn.o"
+predep_objects="/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../../../lib64/crti.o /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/crtbeginS.o"
+postdep_objects="/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/crtendS.o /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../../../lib64/crtn.o"
 predeps=""
 postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3 -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3 -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../../../x86_64-pc-linux-gnu/lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.3.3/../../.."
+compiler_lib_search_path="-L/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../../../x86_64-pc-linux-gnu/lib -L/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/../../.."
 
 # ### END LIBTOOL TAG CONFIG: CXX
