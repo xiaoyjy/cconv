@@ -91,16 +91,16 @@ OTOOL64 =
 PACKAGE = cconv
 PACKAGE_BUGREPORT = xiaoyjy@gmail.com
 PACKAGE_NAME = cconv
-PACKAGE_STRING = cconv 0.5.3
+PACKAGE_STRING = cconv 0.6.0_beta
 PACKAGE_TARNAME = cconv
-PACKAGE_VERSION = 0.5.3
+PACKAGE_VERSION = 0.6.0_beta
 PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = strip
-VERSION = 0.5.3
+VERSION = 0.6.0_beta
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -148,7 +148,7 @@ sysconfdir = ${prefix}/etc
 target_alias = 
 AUTOMAKE_OPTIONS = no-dependencies
 
-EXTRA_DIST = cconv_table.h cconv_table.cc m4
+EXTRA_DIST = cconv_table.h cconv_table.cc m4/*.m4 THANKS
 
 AC_CFLAGS = -Wall  -DLinux
 ACLOCAL_AMFLAGS = -I m4
@@ -162,7 +162,7 @@ lib_LTLIBRARIES = libcconv.la
 libcconv_la_SOURCES = cconv.c
 libcconv_la_CFLAGS = -Wall  -DLinux
 
-include_HEADERS = cconv.h
+include_HEADERS = cconv.h unicode.h
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -198,9 +198,9 @@ HEADERS = $(include_HEADERS)
 
 DIST_COMMON = README $(include_HEADERS) $(srcdir)/Makefile.in \
 	$(srcdir)/configure AUTHORS COPYING ChangeLog INSTALL \
-	Makefile.am NEWS aclocal.m4 compile config.guess config.h.in \
-	config.sub configure configure.ac install-sh ltmain.sh missing \
-	mkinstalldirs
+	Makefile.am NEWS THANKS aclocal.m4 compile config.guess \
+	config.h.in config.sub configure configure.ac install-sh \
+	ltmain.sh missing mkinstalldirs
 SOURCES = $(libcconv_la_SOURCES) $(cconv_SOURCES)
 
 all: config.h
@@ -453,6 +453,7 @@ distcleancheck_listfiles = find . -type f -print
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
+	$(mkinstalldirs) $(distdir)/m4
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

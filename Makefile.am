@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = no-dependencies
 
-EXTRA_DIST = cconv_table.h cconv_table.cc m4
+EXTRA_DIST = cconv_table.h cconv_table.cc m4/*.m4 THANKS
 
 AC_CFLAGS = -Wall @ICONV_INCLUDES@ @OS_TYPE@
 ACLOCAL_AMFLAGS = -I m4
@@ -14,4 +14,4 @@ lib_LTLIBRARIES = libcconv.la
 libcconv_la_SOURCES = cconv.c
 libcconv_la_CFLAGS  = -Wall @ICONV_INCLUDES@ @OS_TYPE@
 
-include_HEADERS = cconv.h
+include_HEADERS = cconv.h unicode.h

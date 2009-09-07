@@ -6,6 +6,8 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
+ *
+ * \author Yang Jianyu <xiaoyjy@hotmail.com>
  */
 
 #include <stdio.h>
@@ -36,7 +38,7 @@ static int find_keyword(
 	size_t*     length   ,
 	int         begin    ,
 	int         end      ,
-	const int   i_offset
+	const int   whence
 );
 
 static int binary_find(
@@ -51,14 +53,14 @@ static int match_cond(
 	const factor_zh_map* cond   ,
 	const char*          str    ,
 	int                  klen   ,
-	const int            i_offset
+	const int            whence
 );
 
 static int match_real_cond(
 	const char* mc   ,
 	const char* str  ,
 	int         head ,
-	const int   i_offset
+	const int   whence
 );
 
 /* {{{ cconv_t cconv_open(const char* tocode, const char* fromcode) */
@@ -434,7 +436,7 @@ int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, i
 }
 /* }}} */
 
-int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end, const int i_offset)
+int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end, const int whence)
 {
 	int location, offset;
 	size_t wwidth, nwidth;
@@ -452,20 +454,20 @@ int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, 
 	}
 	while(nwidth != 0 && (offset = binary_find(cd, inbytes, &wwidth, offset, end)) != -1);
 
-	/* extention word fix. */
+	/* extention word fix, s to t */
 	if(cd == CCONV_UTF_S_TO_T)
 	{
-		if(!match_cond(s2t_cond_ptr(location), inbytes, strlen(s2t_key(location)), i_offset))
+		if(!match_cond(s2t_cond_ptr(location), inbytes, strlen(s2t_key(location)), whence))
 		{
 			*length = utf_char_width(const_bin_c_str(inbytes));
 			return -1;
 		}
 	}
 
-	/* extention word fix. t to s */
+	/* extention word fix, t to s */
 	if(cd == CCONV_UTF_T_TO_S)
 	{
-		if(!match_cond(t2s_cond_ptr(location), inbytes, strlen(t2s_key(location)), i_offset))
+		if(!match_cond(t2s_cond_ptr(location), inbytes, strlen(t2s_key(location)), whence))
 		{
 			*length = utf_char_width(const_bin_c_str(inbytes));
 			return -1;
@@ -475,29 +477,29 @@ int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, 
 	return location;
 }
 
-int match_cond(const factor_zh_map *cond, const char* str, int klen, const int i_offset)
+int match_cond(const factor_zh_map *cond, const char* str, int klen, const int whence)
 {
 	const char* cond_str = NULL;
 	cond_str = get_cond_c_str(cond, n_ma);
-	if(cond_str && match_real_cond(cond_str, str + klen, 0, i_offset))
+	if(cond_str && match_real_cond(cond_str , str + klen, 0, whence))
 		return 0;
 
 	cond_str = get_cond_c_str(cond, n_mb);
-	if(cond_str && match_real_cond(cond_str, str, 1, i_offset))
+	if(cond_str && match_real_cond(cond_str , str, 1, whence))
 		return 0;
 
 	cond_str = get_cond_c_str(cond, y_mb);
-	if(cond_str && !match_real_cond(cond_str, str, 1, i_offset))
+	if(cond_str && !match_real_cond(cond_str, str, 1, whence))
 		return 0;
 	
 	cond_str = get_cond_c_str(cond, y_ma);
-	if(cond_str && !match_real_cond(cond_str, str + klen, 0, i_offset))
+	if(cond_str && !match_real_cond(cond_str, str + klen, 0, whence))
 		return 0;
 
 	return 1;
 }
 
-int match_real_cond(const char* mc, const char* str, int head, const int i_offset)
+int match_real_cond(const char* mc, const char* str, int head, const int whence)
 {
 	int size;
 	char *m_one, *p;
@@ -510,7 +512,7 @@ int match_real_cond(const char* mc, const char* str, int head, const int i_offse
 	m_one = strtok(p, ",");
 	while(m_one)
 	{
-		if((head == 1 && i_offset >= strlen(m_one) &&
+		if((head == 1 && whence >= strlen(m_one) &&
 			memcmp(str - strlen(m_one), m_one, strlen(m_one)) == 0) 
 		 ||(head == 0 && strlen(str) >= strlen(m_one) &&
 			memcmp(str, m_one, strlen(m_one)) == 0)
