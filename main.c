@@ -20,11 +20,11 @@
 #define CCONV_BUFFER_SIZE 4096
 #define CCONV_STRLEN_SIZE 256
 
-#ifndef HAVE_CONFIG_H
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+	#include "config.h"
 #else
-#define PACKAGE_VERSION "0.0.1"
-#define PACKAGE_BUGREPORT "reg256@sina.com.cn"
+	#define PACKAGE_VERSION "0.0.1"
+	#define PACKAGE_BUGREPORT "xiaoyjy@gmail.com"
 #endif
 
 /* {{{ void usage( char *s_program ) */
