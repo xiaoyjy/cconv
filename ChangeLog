@@ -1,13 +1,14 @@
 ==== Changlog ====
 
 -- 0.6.0_beta
-	重写了对包含交叉语义语句的处理代码，更改了判断方式。
+	Rewrite the cross-handling part, and change the judge algorithm.
 
-	增加四种条件转换方式（前缀/后缀法）
-		1、仅前缀匹配才转
-		2、仅后缀匹配才转
-		3、前缀匹配则不转
-		4、后缀匹配则不转
+	Increase four kinds of prefix & suffix based conditions conversion
+	mode:
+		1、convert the prefix match before only
+		2、convert the suffix match before only
+		3、prefix match is not to convert.
+		4、suffix match is not to convert.
 
 -- 0.5.2
 	Add AC_CONFIG_MACRO_DIR([m4]) to fix complie error on CentOS 4.X

@@ -479,7 +479,10 @@ int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, 
 
 int match_cond(const factor_zh_map *cond, const char* str, int klen, const int whence)
 {
-	const char* cond_str = NULL;
+	int y_ma, y_mb;
+	const char *cond_str = NULL;
+	const char *y_a_null, *y_b_null;
+
 	cond_str = get_cond_c_str(cond, n_ma);
 	if(cond_str && match_real_cond(cond_str , str + klen, 0, whence))
 		return 0;
@@ -488,15 +491,12 @@ int match_cond(const factor_zh_map *cond, const char* str, int klen, const int w
 	if(cond_str && match_real_cond(cond_str , str, 1, whence))
 		return 0;
 
-	cond_str = get_cond_c_str(cond, y_mb);
-	if(cond_str && !match_real_cond(cond_str, str, 1, whence))
-		return 0;
+	y_b_null = cond_str = get_cond_c_str(cond, y_mb);
+	y_ma = cond_str && match_real_cond(cond_str, str, 1, whence);
 	
-	cond_str = get_cond_c_str(cond, y_ma);
-	if(cond_str && !match_real_cond(cond_str, str + klen, 0, whence))
-		return 0;
-
-	return 1;
+	y_a_null = cond_str = get_cond_c_str(cond, y_ma);
+	y_mb = cond_str && match_real_cond(cond_str, str + klen, 0, whence);
+	return (!y_b_null&&!y_a_null) | y_ma | y_mb;
 }
 
 int match_real_cond(const char* mc, const char* str, int head, const int whence)
