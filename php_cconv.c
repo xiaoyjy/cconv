@@ -56,21 +56,33 @@ PHP_FUNCTION(cconv)
 
     if((conv = cconv_open(tocode, fromcode)) == (cconv_t)(-1)) {
 	fprintf(stderr, "Not support character code set.\n");
+        RETVAL_FALSE;
     }
 
     outlen  = 3 * inlen;
+#ifdef FreeBSD
+    out_ptr = outbytes = (char*)malloc(outlen);
+#else
     out_ptr = outbytes = (char*)emalloc(outlen);
+#endif
     size = cconv(conv, &inbytes, &inlen, &out_ptr, &outlen);
     cconv_close(conv);
 
     if(size == (size_t)(-1))
     {
         fprintf(stderr, "cconv: %s\n", strerror(errno));
+#ifdef FreeBSD
+    	free(outbytes);
+#endif
         RETVAL_FALSE;
     }
 
     outlen = out_ptr - outbytes;
     RETVAL_STRING(outbytes, outlen);
+#ifdef FreeBSD
+    free(outbytes);
+#else
     efree(outbytes);
+#endif
 }
 
