@@ -11,7 +11,7 @@ cconv_CFLAGS  = ${AC_CFLAGS}
 cconv_LDFLAGS = @ICONV_LIBS@
 
 lib_LTLIBRARIES = libcconv.la
-libcconv_la_SOURCES = cconv.c
+libcconv_la_SOURCES = cconv.c unicode.c
 libcconv_la_CFLAGS  = -Wall @ICONV_INCLUDES@ @OS_TYPE@
 
 include_HEADERS = cconv.h unicode.h

@@ -1,6 +1,6 @@
-AC_DEFINE(PACKAGE_VERSION, "0.6.2")
+AC_DEFINE(PACKAGE_VERSION, "0.6.4")
 AC_DEFINE(PACKAGE_NAME, "cconv-php")
-AC_DEFINE(PACKAGE_BUGREPORT, "httpqueue@sina.com.cn")
+AC_DEFINE(PACKAGE_BUGREPORT, "reg256@sina.com.cn")
 
 PHP_ARG_ENABLE(cconv, whether to enable cconv support,
 [ --enable-cconv   Enable cconv support])
@@ -28,6 +28,8 @@ AC_DEFUN([PHP_CCONV_BIN],[
   PHP_ADD_INCLUDE($PHP_CCONV_DIR/include)
   PHP_ADD_LIBRARY_WITH_PATH(cconv, $PHP_CCONV_DIR/$PHP_LIBDIR, CCONV_SHARED_LIBADD)
 ])
+
+CFLAGS="$CFLAGS -D"`uname -s`
 
 if test "$PHP_CCONV" = "yes"; then
   PHP_CCONV_BIN

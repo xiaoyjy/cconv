@@ -237,7 +237,7 @@ hardcode_into_libs=yes
 sys_lib_search_path_spec="/usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 /usr/lib64 /lib64 /usr/x86_64-pc-linux-gnu/lib"
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/local/lib //usr/lib32/opengl/ati/lib //usr/lib64/opengl/ati/lib /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib64 /lib32 /usr/lib32 /usr/local/lib32 /usr/x86_64-pc-linux-gnu/lib /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/32 /usr/lib64/nspr /usr/lib64/nss /usr/lib64/xulrunner-1.9.1.2 /usr/kde/3.5/lib32 /usr/kde/3.5/lib64 /usr/kde/3.5/lib /usr/qt/3/lib /usr/qt/3/lib64 /usr/qt/3/lib32 /opt/xulrunner /usr/games/lib /usr/games/lib64 /usr/games/lib32 /usr/lib32/libstdc++-v3/ "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/local/lib //usr/lib32/opengl/xorg-x11/lib //usr/lib64/opengl/xorg-x11/lib /lib /usr/lib /lib64 /usr/lib64 /usr/local/lib64 /lib32 /usr/lib32 /usr/local/lib32 /usr/x86_64-pc-linux-gnu/lib /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1 /usr/lib/gcc/x86_64-pc-linux-gnu/4.4.1/32 /usr/lib64/nspr /usr/lib64/nss /usr/lib64/xulrunner-1.9.1 /opt/xulrunner /usr/games/lib /usr/games/lib64 /usr/games/lib32 /usr/lib32/libstdc++-v3/ "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
@@ -1070,13 +1070,6 @@ elif test "X`{ $ECHO '\t'; } 2>/dev/null`" = 'X\t'; then
 else
   # Restart under the correct shell, and then maybe $ECHO will work.
   exec $SHELL "$progpath" --no-reexec ${1+"$@"}
-fi
-# Same for EGREP, and just to be sure, do LTCC as well
-if test "x$EGREP" = x ; then
-    EGREP=egrep
-fi
-if test "x$LTCC" = x ; then
-    LTCC=${CC-gcc}
 fi
 
 if test "X$1" = X--fallback-echo; then
@@ -5224,11 +5217,6 @@ func_mode_link ()
 	arg=$func_stripname_result
 	;;
 
-      -Wl,--as-needed|-Wl,--no-as-needed)
-	deplibs="$deplibs $arg"
-	continue
-	;;
-
       -Wl,*)
 	func_stripname '-Wl,' '' "$arg"
 	args=$func_stripname_result
@@ -5580,15 +5568,6 @@ func_mode_link ()
 	lib=
 	found=no
 	case $deplib in
-	-Wl,--as-needed|-Wl,--no-as-needed)
-	  if test "$linkmode,$pass" = "prog,link"; then
-	    compile_deplibs="$deplib $compile_deplibs"
-	    finalize_deplibs="$deplib $finalize_deplibs"
-	  else
-	    deplibs="$deplib $deplibs"
-	  fi
-	  continue
-	  ;;
 	-mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe|-threads)
 	  if test "$linkmode,$pass" = "prog,link"; then
 	    compile_deplibs="$deplib $compile_deplibs"
@@ -8581,53 +8560,9 @@ EOF
 		eval libdir=`${SED} -n -e 's/^libdir=\(.*\)$/\1/p' $deplib`
 		test -z "$libdir" && \
 		  func_fatal_error "\`$deplib' is not a valid libtool archive"
-		if test "x$EGREP" = x ; then
-			EGREP=egrep
-		fi
-		# We do not want portage's install root ($D) present.  Check only for
-		# this if the .la is being installed.
-		if test "$installed" = yes && test "$D"; then
-		  eval mynewdependency_lib=`echo "$libdir/$name" |sed -e "s:$D:/:g" -e 's:/\+:/:g'`
-		else
-		  mynewdependency_lib="$libdir/$name"
-		fi
-		# Do not add duplicates
-		if test "$mynewdependency_lib"; then
-		  my_little_ninja_foo_1=`echo $newdependency_libs |$EGREP -e "$mynewdependency_lib"`
-		  if test -z "$my_little_ninja_foo_1"; then
-		    newdependency_libs="$newdependency_libs $mynewdependency_lib"
-		  fi
-		fi
+		newdependency_libs="$newdependency_libs $libdir/$name"
 		;;
-		  *)
-		if test "$installed" = yes; then
-		  # Rather use S=WORKDIR if our version of portage supports it.
-		  # This is because some ebuild (gcc) do not use $S as buildroot.
-		  if test "$PWORKDIR"; then
-		    S="$PWORKDIR"
-		  fi
-		  # We do not want portage's build root ($S) present.
-		  my_little_ninja_foo_2=`echo $deplib |$EGREP -e "$S"`
-		  # We do not want portage's install root ($D) present.
-		  my_little_ninja_foo_3=`echo $deplib |$EGREP -e "$D"`
-		  if test -n "$my_little_ninja_foo_2" && test "$S"; then
-		    mynewdependency_lib=""
-		  elif test -n "$my_little_ninja_foo_3" && test "$D"; then
-		    eval mynewdependency_lib=`echo "$deplib" |sed -e "s:$D:/:g" -e 's:/\+:/:g'`
-		  else
-		    mynewdependency_lib="$deplib"
-		  fi
-		else
-		  mynewdependency_lib="$deplib"
-		fi
-		# Do not add duplicates
-		if test "$mynewdependency_lib"; then
-		  my_little_ninja_foo_4=`echo $newdependency_libs |$EGREP -e "$mynewdependency_lib"`
-		  if test -z "$my_little_ninja_foo_4"; then
-			newdependency_libs="$newdependency_libs $mynewdependency_lib"
-		  fi
-		fi
-		;;
+	      *) newdependency_libs="$newdependency_libs $deplib" ;;
 	      esac
 	    done
 	    dependency_libs="$newdependency_libs"
@@ -8691,10 +8626,6 @@ EOF
 	  case $host,$output,$installed,$module,$dlname in
 	    *cygwin*,*lai,yes,no,*.dll | *mingw*,*lai,yes,no,*.dll | *cegcc*,*lai,yes,no,*.dll) tdlname=../bin/$dlname ;;
 	  esac
-	  # Do not add duplicates
-	  if test "$installed" = yes && test "$D"; then
-	    install_libdir=`echo "$install_libdir" |sed -e "s:$D:/:g" -e 's:/\+:/:g'`
-	  fi
 	  $ECHO > $output "\
 # $outputname - a libtool library file
 # Generated by $PROGRAM (GNU $PACKAGE$TIMESTAMP) $VERSION

@@ -91,16 +91,16 @@ OTOOL64 =
 PACKAGE = cconv
 PACKAGE_BUGREPORT = xiaoyjy@gmail.com
 PACKAGE_NAME = cconv
-PACKAGE_STRING = cconv 0.6.0_beta
+PACKAGE_STRING = cconv 0.6.0
 PACKAGE_TARNAME = cconv
-PACKAGE_VERSION = 0.6.0_beta
+PACKAGE_VERSION = 0.6.0
 PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/sh
 STRIP = strip
-VERSION = 0.6.0_beta
+VERSION = 0.6.0
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -159,7 +159,7 @@ cconv_CFLAGS = ${AC_CFLAGS}
 cconv_LDFLAGS = 
 
 lib_LTLIBRARIES = libcconv.la
-libcconv_la_SOURCES = cconv.c
+libcconv_la_SOURCES = cconv.c unicode.c
 libcconv_la_CFLAGS = -Wall  -DLinux
 
 include_HEADERS = cconv.h unicode.h
@@ -172,7 +172,7 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libcconv_la_LDFLAGS =
 libcconv_la_LIBADD =
-am_libcconv_la_OBJECTS = libcconv_la-cconv.lo
+am_libcconv_la_OBJECTS = libcconv_la-cconv.lo libcconv_la-unicode.lo
 libcconv_la_OBJECTS = $(am_libcconv_la_OBJECTS)
 bin_PROGRAMS = cconv$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
@@ -327,6 +327,15 @@ libcconv_la-cconv.obj: cconv.c
 
 libcconv_la-cconv.lo: cconv.c
 	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcconv_la_CFLAGS) $(CFLAGS) -c -o libcconv_la-cconv.lo `test -f 'cconv.c' || echo '$(srcdir)/'`cconv.c
+
+libcconv_la-unicode.o: unicode.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcconv_la_CFLAGS) $(CFLAGS) -c -o libcconv_la-unicode.o `test -f 'unicode.c' || echo '$(srcdir)/'`unicode.c
+
+libcconv_la-unicode.obj: unicode.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcconv_la_CFLAGS) $(CFLAGS) -c -o libcconv_la-unicode.obj `if test -f 'unicode.c'; then $(CYGPATH_W) 'unicode.c'; else $(CYGPATH_W) '$(srcdir)/unicode.c'; fi`
+
+libcconv_la-unicode.lo: unicode.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libcconv_la_CFLAGS) $(CFLAGS) -c -o libcconv_la-unicode.lo `test -f 'unicode.c' || echo '$(srcdir)/'`unicode.c
 
 cconv-cconv.o: cconv.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cconv_CFLAGS) $(CFLAGS) -c -o cconv-cconv.o `test -f 'cconv.c' || echo '$(srcdir)/'`cconv.c
