@@ -1,5 +1,10 @@
 ==== Changlog ====
 
+-- 0.6.0
+	Update cconv_table.cc to latest.
+
+	Fix the bug that Jane transfer into fan does not work.
+
 -- 0.6.0_beta
 	Rewrite the cross-handling part, and change the judge algorithm.
 
