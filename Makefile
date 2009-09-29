@@ -148,7 +148,7 @@ sysconfdir = ${prefix}/etc
 target_alias = 
 AUTOMAKE_OPTIONS = no-dependencies
 
-EXTRA_DIST = cconv_table.h cconv_table.cc m4/*.m4 THANKS
+EXTRA_DIST = cconv_table.h cconv_table.cc m4/*.m4 THANKS test_s2t test_t2s
 
 AC_CFLAGS = -Wall  -DLinux
 ACLOCAL_AMFLAGS = -I m4
