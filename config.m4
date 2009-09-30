@@ -1,5 +1,5 @@
 AC_DEFINE(PACKAGE_VERSION, "0.6.4")
-AC_DEFINE(PACKAGE_NAME, "cconv-php")
+AC_DEFINE(PACKAGE_NAME, "cconv")
 AC_DEFINE(PACKAGE_BUGREPORT, "reg256@sina.com.cn")
 
 PHP_ARG_ENABLE(cconv, whether to enable cconv support,
