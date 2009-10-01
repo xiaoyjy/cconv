@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.13)
-AC_INIT(cconv, 0.6.0, xiaoyjy@gmail.com)
-AM_INIT_AUTOMAKE(cconv, 0.6.0)
+AC_INIT(cconv, 0.6.1, xiaoyjy@gmail.com)
+AM_INIT_AUTOMAKE(cconv, 0.6.1)
 AC_CONFIG_SRCDIR([cconv.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -46,7 +46,7 @@ AC_SUBST(ICONV_LIBS)
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
-AC_CHECK_FUNCS([memset strncasecmp])
+AC_CHECK_FUNCS([memset strncasecmp memcpy])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

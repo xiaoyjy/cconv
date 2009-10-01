@@ -1,5 +1,11 @@
 ==== Changlog ====
 
+-- 0.6.1
+	Update cconv_table.cc to latest.
+
+	Add some Tongwen Tang word mapping.
+	Fix the bug that something cconv output are not end with '\0'
+
 -- 0.6.0
 	Update cconv_table.cc to latest.
 

@@ -299,6 +299,7 @@ size_t cconv(cconv_t cd,
 
 	*inbuf  = ps_inbuf;
 	*outbuf = ps_outbuf + i_conv;
+	ps_outbuf[i_conv] = '\0';
 	return i_conv;
 
 	case CCONV_UTF_T_TO_S:
@@ -337,6 +338,7 @@ size_t cconv(cconv_t cd,
 	} // for
 	*inbuf  = ps_inbuf;
 	*outbuf = ps_outbuf + i_conv;
+	ps_outbuf[i_conv] = '\0';
 	return i_conv;
 
 	case CCONV_NULL:
