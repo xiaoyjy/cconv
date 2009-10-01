@@ -65,6 +65,7 @@ PHP_FUNCTION(cconv)
 #else
     out_ptr = outbytes = (char*)emalloc(outlen);
 #endif
+    memset(out_ptr, 0x0, outlen);
     size = cconv(conv, &inbytes, &inlen, &out_ptr, &outlen);
     cconv_close(conv);
 
