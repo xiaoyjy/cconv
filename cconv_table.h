@@ -13,28 +13,6 @@
 #ifndef _CCONV_TABLE_H_
 #define _CCONV_TABLE_H_
 
-#define CCONV_CODE_UTF  "UTF-8"
-#define CCONV_CODE_GBK  "GBK"
-#define CCONV_CODE_BIG  "BIG5"
-#define CCONV_CODE_UCN  "UTF8-CN"
-#define CCONV_CODE_UTW  "UTF8-TW"
-#define CCONV_CODE_UHK  "UTF8-HK"
-
-typedef enum cconv_type
-{
-        CCONV_ERROR = -1,
-	CCONV_NULL  = 0,
-        CCONV_GBK_TO_BIG = 1,
-        CCONV_GBK_TO_UTT,
-        CCONV_BIG_TO_GBK,
-        CCONV_BIG_TO_UTS,
-        CCONV_UTF_S_TO_T,
-        CCONV_UTF_T_TO_S,
-	CCONV_UTF_TO_GBK,
-	CCONV_UTF_TO_BIG
-}
-cconv_type;
-
 typedef struct factor_zh_map
 {
 	unsigned int n_ma;
@@ -56,11 +34,16 @@ language_zh_map;
 
 #include "cconv_table.cc"
 
-#define get_zh_map(cd) \
-	(cd == CCONV_UTF_S_TO_T) ? map_uni_s2t : map_uni_t2s
+#define zh_map(cd) \
+	(cd == CCONV_UTF_TO_UHT) ? map_uni_s2t : map_uni_t2s
+
+#define zh_map_size(cd) \
+	(cd == CCONV_UTF_TO_UHT) ? map_uni_s2t_size : map_uni_t2s_size
 
 #define s2t_have_cond(x) (map_uni_s2t[x].cond != -1)
 #define t2s_have_cond(x) (map_uni_t2s[x].cond != -1)
+
+#define have_cond(a, x) (a[x].cond != -1)
 
 #define s2t_cond_ptr(x) \
 	(map_uni_s2t[x].cond != -1 ? \
@@ -70,19 +53,28 @@ language_zh_map;
 	(map_uni_t2s[x].cond != -1 ? \
 	&map_zh_cond[map_uni_t2s[x].cond] : NULL)
 
+#define cond_ptr(a, x) \
+	(a[x].cond != -1 ? \
+	&map_zh_cond[a[x].cond] : NULL)
+
 /* return char* */
-#define get_cond_c_str(o, t) \
+#define cond_c_str(o, t) \
 	(o != NULL && o->t != -1 ? zh_sets_cond[o->t] : NULL)
 
 /* DO Make sure the cond offset is NOT -1 */
 #define s2t_cond_gobal_c_str(x, t) zh_sets_cond[map_zh_cond[map_uni_s2t[x].cond].t]
 #define t2s_cond_gobal_c_str(x, t) zh_sets_cond[map_zh_cond[map_uni_t2s[x].cond].t]
 
+#define cond_gobal_c_str(a, x, t) zh_sets_cond[map_zh_cond[a[x].cond].t]
+
 #define s2t_key(x) map_uni_s2t[x].key
 #define s2t_val(x) map_uni_s2t[x].val
 
 #define t2s_key(x) map_uni_t2s[x].key
 #define t2s_val(x) map_uni_t2s[x].val
+
+#define map_key(a, x) a[x].key
+#define map_val(a, x) a[x].val
 
 #define s2t_size() map_uni_s2t_size
 #define t2s_size() map_uni_t2s_size

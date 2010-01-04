@@ -29,22 +29,37 @@ typedef struct cconv_struct
 {
 	cconv_type cconv_cd;
 	iconv_t    iconv_cd;
+	iconv_t    gb_utf8;
+	iconv_t    bg_utf8;
+	iconv_t    utf8_gb;
+	iconv_t    utf8_bg;
+	int        size_factor;
+	char       options[16];
 }
 cconv_struct;
 
+static size_t cconv_utf8(
+	const char** inbuf,
+	size_t* inleft    ,
+	char**  outbuf    ,
+	size_t* outleft   ,
+	const language_zh_map *m,
+	int map_size
+);
+
 static int find_keyword(
-	cconv_type  cd       ,
 	const char* inbytes  ,
 	size_t*     length   ,
+	const language_zh_map *m   ,
 	int         begin    ,
 	int         end      ,
 	const int   whence
 );
 
 static int binary_find(
-	cconv_type  cd       ,
 	const char* inbytes  ,
 	size_t*     length   ,
+	const language_zh_map *m   ,
 	int         begin    ,
 	int         end
 );
@@ -73,109 +88,148 @@ static int match_real_cond(
  */
 cconv_t cconv_open(const char* tocode, const char* fromcode)
 {
+	char code[8] = {0, };
+	char *ptr;
 	cconv_struct* cd = (cconv_struct*)malloc(sizeof(cconv_struct));
 	cd->cconv_cd = CCONV_NULL;
 	cd->iconv_cd = NULL;
+	cd->gb_utf8 = NULL;
+	cd->bg_utf8 = NULL;
+	cd->utf8_gb = NULL;
+	cd->utf8_bg = NULL;
+	cd->size_factor = 4;
 
-	if(0 == strcasecmp(CCONV_CODE_GBK, fromcode)) {
-
-		if(0 == strcasecmp(CCONV_CODE_BIG, tocode))
-			cd->cconv_cd = CCONV_GBK_TO_BIG;
-		else if(0 == strcasecmp(CCONV_CODE_UHK, tocode)
-		     || 0 == strcasecmp(CCONV_CODE_UTW, tocode)
-		)
-			cd->cconv_cd = CCONV_GBK_TO_UTT;
+	/* //IGNORE //TRANSPORT etc. */
+	if((ptr = strstr(fromcode, "//")) != NULL)
+	{
+		strncpy(cd->options, ptr     , 16);
+		strncpy(code       , fromcode, ptr - fromcode);
+		fromcode = code;
 	}
-	else
-	if(0 == strcasecmp(CCONV_CODE_BIG, fromcode)) {
 
-		if(0 == strcasecmp(CCONV_CODE_GBK, tocode))
-			cd->cconv_cd = CCONV_BIG_TO_GBK;
-
-		else if(0 == strcasecmp(CCONV_CODE_UCN, tocode))
-			cd->cconv_cd = CCONV_BIG_TO_UTS;
+	if(0 == strcasecmp(CCONV_CODE_GBL, fromcode))
+	{
+		cd->gb_utf8 = iconv_open(CCONV_CODE_UTF, CCONV_CODE_GBL);
+		if(0 == strcasecmp(CCONV_CODE_UHT, tocode) || 0 == strcasecmp(CCONV_CODE_UHK, tocode)
+				||0 == strcasecmp(CCONV_CODE_UTW, tocode))
+		{
+			cd->cconv_cd = CCONV_GBL_TO_UHT;
+		}
+		else if(0 == strcasecmp(CCONV_CODE_UHS, tocode) || 0 == strcasecmp(CCONV_CODE_UCN, tocode))
+			cd->cconv_cd = CCONV_GBL_TO_UHS;
+		else if(0 == strcasecmp(CCONV_CODE_BIG, tocode))
+		{
+			cd->cconv_cd = CCONV_GBL_TO_BIG;
+			cd->utf8_bg  = iconv_open(CCONV_CODE_BIG, CCONV_CODE_UTF);
+		}
+		else if(0 == strcasecmp(CCONV_CODE_GHS, tocode))
+		{
+			cd->cconv_cd = CCONV_GBL_TO_GHS;
+			cd->utf8_gb  = iconv_open(CCONV_CODE_GBL, CCONV_CODE_UTF);
+		}
+		else if(0 == strcasecmp(CCONV_CODE_GHT, tocode))
+		{
+			cd->cconv_cd = CCONV_GBL_TO_GHT;
+			cd->utf8_gb  = iconv_open(CCONV_CODE_GBL, CCONV_CODE_UTF);
+		}
 	}
 	else
 	if(0 == strcasecmp(CCONV_CODE_UTF, fromcode)
+	 ||0 == strcasecmp(CCONV_CODE_UHS, fromcode)
+	 ||0 == strcasecmp(CCONV_CODE_UHT, fromcode)
 	 ||0 == strcasecmp(CCONV_CODE_UCN, fromcode)
 	 ||0 == strcasecmp(CCONV_CODE_UHK, fromcode)
 	 ||0 == strcasecmp(CCONV_CODE_UTW, fromcode)
 	) {
-		if(0 == strcasecmp(CCONV_CODE_UCN, tocode))
-			cd->cconv_cd = CCONV_UTF_T_TO_S;
-		else if(0 == strcasecmp(CCONV_CODE_UHK, tocode) ||
-				 0 == strcasecmp(CCONV_CODE_UTW, tocode))
-			cd->cconv_cd = CCONV_UTF_S_TO_T;
-		else if(0 == strcasecmp(CCONV_CODE_GBK, tocode))
-			cd->cconv_cd = CCONV_UTF_TO_GBK;
+		if(0 == strcasecmp(CCONV_CODE_UHS, tocode) || 0 == strcasecmp(CCONV_CODE_UCN, tocode))
+			cd->cconv_cd = CCONV_UTF_TO_UHS;
+		else if(0 == strcasecmp(CCONV_CODE_UHT, tocode) || 0 == strcasecmp(CCONV_CODE_UHK, tocode)
+		     || 0 == strcasecmp(CCONV_CODE_UTW, tocode))
+			cd->cconv_cd = CCONV_UTF_TO_UHT;
+		else if(0 == strcasecmp(CCONV_CODE_GBL, tocode))
+		{
+			cd->cconv_cd = CCONV_UTF_TO_GBL;
+			cd->utf8_gb  = iconv_open(CCONV_CODE_GBL, CCONV_CODE_UTF);
+		}
 		else if(0 == strcasecmp(CCONV_CODE_BIG, tocode))
+		{
 			cd->cconv_cd = CCONV_UTF_TO_BIG;
+			cd->utf8_bg  = iconv_open(CCONV_CODE_GBL, CCONV_CODE_UTF);
+		}
+
+		cd->size_factor = 1;
+	}
+	else
+	if(0 == strcasecmp(CCONV_CODE_BIG, fromcode))
+	{
+		if(0 == strcasecmp(CCONV_CODE_GBL, tocode))
+		{
+			cd->cconv_cd = CCONV_BIG_TO_GBL;
+			cd->bg_utf8  = iconv_open(CCONV_CODE_UTF, CCONV_CODE_BIG);
+			cd->utf8_gb  = iconv_open(CCONV_CODE_GBL, CCONV_CODE_UTF);
+		}
+		else if(0 == strcasecmp(CCONV_CODE_UHS, tocode) || 0 == strcasecmp(CCONV_CODE_UCN, tocode))
+		{
+			cd->cconv_cd = CCONV_BIG_TO_UHS;
+			cd->bg_utf8  = iconv_open(CCONV_CODE_UTF, CCONV_CODE_BIG);
+printf("%s %s", CCONV_CODE_BIG, CCONV_CODE_UTF);
+		}
+
+		/* just use iconv to do others. */
 	}
 
-	if(cd->cconv_cd == CCONV_ERROR)
-		return (cconv_t)(-1);
-
-	if(cd->cconv_cd != CCONV_NULL)
-		return cd;
-
-	cd->iconv_cd = iconv_open(tocode, fromcode);
-	if(cd->iconv_cd == (iconv_t)(-1))
-		return (cconv_t)(-1);
+	if(cd->cconv_cd == CCONV_NULL)
+		cd->iconv_cd = iconv_open(tocode, fromcode);
+	
+	if( cd->iconv_cd == (iconv_t)(-1) || cd->gb_utf8  == (iconv_t)(-1)
+	 || cd->bg_utf8  == (iconv_t)(-1) || cd->utf8_gb  == (iconv_t)(-1)
+	 || cd->utf8_bg  == (iconv_t)(-1)) {
+		cconv_close(cd);
+		return (cconv_t)(CCONV_ERROR);
+	}
 
 	return cd;
 }
 /* }}} */
 
-#define cconv_iconv_first(to, from) \
+#define cconv_iconv_first(cd) \
 	ps_outbuf = ps_midbuf = (char*)malloc(o_proc); \
-	cd_struct->iconv_cd = iconv_open(to, from); \
-	if(cd_struct->iconv_cd == (iconv_t)(-1)) { \
-		errno = EILSEQ; \
-		free(ps_midbuf); \
-		return (size_t)(-1); \
-	} \
-	  \
-	if(iconv(cd_struct->iconv_cd, inbuf, inbytesleft, &ps_outbuf, &o_proc) == -1) { \
+	if(iconv(cd, inbuf, inbytesleft, &ps_outbuf, &o_proc) == -1) { \
 		free(ps_midbuf); return (size_t)(-1); \
 	} \
-	  \
-	iconv_close(cd_struct->iconv_cd); cd_struct->iconv_cd = NULL; \
-	*ps_outbuf = '\0';
+	*ps_outbuf = '\0'; \
 
-#define cconv_cconv_second(type) \
-	cd_struct->cconv_cd = type; \
+#define cconv_cconv_second(n, o) \
+	cd_struct->cconv_cd = n; \
 	ps_inbuf = ps_midbuf; \
-	o_proc = strlen(ps_inbuf); \
-	if((i_conv = cconv(cd_struct, &ps_inbuf, &o_proc, outbuf, outbytesleft)) == -1) { \
+	o_proc   = strlen(ps_midbuf); \
+	if((i_proc = cconv(cd, &ps_inbuf, &o_proc, outbuf, outbytesleft)) == -1) { \
 		free(ps_midbuf); return (size_t)(-1); \
 	} \
-	free(ps_midbuf);
+	free(ps_midbuf); \
+	cd_struct->cconv_cd = o; \
+	return i_proc;
 
-#define cconv_cconv_first(type) \
+#define cconv_cconv_first(n, o) \
 	ps_outbuf = ps_midbuf = (char*)malloc(o_proc); \
-	cd_struct->cconv_cd = type; \
-	if(cconv(cd_struct, inbuf, inbytesleft, &ps_outbuf, &o_proc) == -1) { \
-		free(ps_midbuf); return (size_t)(-1); \
-	}
-
-#define cconv_iconv_second(to, from) \
-	cd_struct->iconv_cd = iconv_open(to, from); \
-	if(cd_struct->iconv_cd == (iconv_t)(-1)) { \
+	cd_struct->cconv_cd = n; \
+	if((i_proc = cconv(cd, inbuf, inbytesleft, &ps_outbuf, &o_proc)) == -1) { \
 		free(ps_midbuf); return (size_t)(-1); \
 	} \
-	  \
+	cd_struct->cconv_cd = o; \
+		
+#define cconv_iconv_second(c) \
 	ps_outbuf = *outbuf; \
 	ps_inbuf  = ps_midbuf; \
-	o_proc = strlen(ps_inbuf); \
-	if(iconv(cd_struct->iconv_cd, &ps_inbuf, &o_proc, outbuf, outbytesleft) == -1) { \
+	if(iconv(c, &ps_inbuf, &i_proc, outbuf, outbytesleft) == -1) { \
 		free(ps_midbuf); return (size_t)(-1); \
 	} \
-	  \
-	iconv_close(cd_struct->iconv_cd); \
-	cd_struct->iconv_cd = NULL; \
-	free(ps_midbuf);
+	free(ps_midbuf); \
+	return *outbuf - ps_outbuf;
 
 #define const_bin_c_str(x) (const unsigned char*)(x)
+
+#define EMPTY_END_SIZE 8
 
 /* {{{ size_t cconv() */
 /**
@@ -197,150 +251,71 @@ size_t cconv(cconv_t cd,
 		char**  outbuf,
 		size_t* outbytesleft)
 {
-	size_t  i_conv	= 0;
-	size_t  i_proc	= 0;
-	size_t  o_proc  = 0;
-	int     i_offset  = 0,
-		index = 0;
+	size_t  i_proc = 0, o_proc = 0;
 #ifdef FreeBSD
 	const char *ps_inbuf  = NULL;
 #else
 	char *ps_inbuf = NULL;
 #endif
-	char *ps_outbuf = NULL;
-	char *ps_midbuf;
+	char *ps_midbuf, *ps_outbuf = NULL;
+	language_zh_map *m;
+	int map_size;
+
+	if(NULL == inbuf  || NULL == *inbuf  || NULL == inbytesleft || NULL == outbuf || NULL == *outbuf || NULL == outbytesleft)
+		return(size_t)(-1);
 
 	cconv_struct *cd_struct = cd;
-	ps_inbuf = *inbuf;
+	ps_inbuf  = *inbuf;
 	ps_outbuf = *outbuf;
+	o_proc    = cd_struct->size_factor * (*inbytesleft) + EMPTY_END_SIZE;
 
-	if(NULL == inbuf  || NULL == *inbuf  || NULL == inbytesleft
-	   		|| NULL == outbuf || NULL == *outbuf || NULL == outbytesleft)
+	if((cconv_t)(CCONV_ERROR) == cd)
 		return(size_t)(-1);
 
 	switch(cd_struct->cconv_cd)
 	{
-	case CCONV_GBK_TO_UTT:
-		o_proc = 4 * (*inbytesleft) + 16;
-		cconv_iconv_first (CCONV_CODE_UTF, CCONV_CODE_GBK);
-		cconv_cconv_second(CCONV_UTF_S_TO_T);
-		cd_struct->cconv_cd = CCONV_GBK_TO_UTT;
-		return i_conv;
+	case CCONV_UTF_TO_UHT:
+	case CCONV_UTF_TO_UHS:
+		m        = zh_map     (cd_struct->cconv_cd);
+		map_size = zh_map_size(cd_struct->cconv_cd);
+		return cconv_utf8((const char**)inbuf, inbytesleft, outbuf, outbytesleft, m, map_size);
 
-	case CCONV_BIG_TO_UTS:
-		o_proc = 4 * (*inbytesleft) + 16;
-		cconv_iconv_first (CCONV_CODE_UTF, CCONV_CODE_BIG);
-		cconv_cconv_second(CCONV_UTF_T_TO_S);
-		cd_struct->cconv_cd = CCONV_BIG_TO_UTS;
-		return i_conv;
-
-	case CCONV_GBK_TO_BIG:
-		o_proc = 4 * (*inbytesleft) + 128;
-		cconv_cconv_first (CCONV_GBK_TO_UTT);
-		cconv_iconv_second(CCONV_CODE_BIG, CCONV_CODE_UTF);
-		cd_struct->cconv_cd = CCONV_GBK_TO_BIG;
-		return *outbuf - ps_outbuf;
-
-	case CCONV_BIG_TO_GBK:
-		o_proc = 4 * (*inbytesleft) + 128;
-		cconv_cconv_first (CCONV_BIG_TO_UTS);
-		cconv_iconv_second(CCONV_CODE_GBK, CCONV_CODE_UTF);
-		cd_struct->cconv_cd = CCONV_BIG_TO_GBK;
-		return *outbuf - ps_outbuf;
-
-	case CCONV_UTF_TO_GBK:
-		o_proc = *inbytesleft + 512;
-		cconv_cconv_first (CCONV_UTF_T_TO_S);
-		cconv_iconv_second(CCONV_CODE_GBK, CCONV_CODE_UTF);
-		cd_struct->cconv_cd = CCONV_UTF_TO_GBK;
-		return *outbuf - ps_outbuf;
+	case CCONV_UTF_TO_GBL:
+		cconv_cconv_first(CCONV_UTF_TO_UHS, CCONV_UTF_TO_GBL);
+		cconv_iconv_second(cd_struct->utf8_gb);
 
 	case CCONV_UTF_TO_BIG:
-		o_proc = *inbytesleft + 512;
-		cconv_cconv_first (CCONV_UTF_S_TO_T);
-		cconv_iconv_second(CCONV_CODE_BIG, CCONV_CODE_UTF);
-		cd_struct->cconv_cd = CCONV_UTF_TO_BIG;
-		return *outbuf - ps_outbuf;
+		cconv_cconv_first(CCONV_UTF_TO_UHT, CCONV_UTF_TO_BIG);
+		cconv_iconv_second(cd_struct->utf8_bg);
+
+	case CCONV_GBL_TO_UHT:
+		cconv_iconv_first(cd_struct->gb_utf8);
+		cconv_cconv_second(CCONV_UTF_TO_UHT, CCONV_GBL_TO_UHT);
+
+	case CCONV_GBL_TO_UHS:
+		cconv_iconv_first(cd_struct->gb_utf8);
+		cconv_cconv_second(CCONV_UTF_TO_UHS, CCONV_GBL_TO_UHS);
+
+	case CCONV_GBL_TO_BIG:
+		cconv_cconv_first(CCONV_GBL_TO_UHT, CCONV_GBL_TO_BIG);
+		cconv_iconv_second(cd_struct->utf8_bg);
+
+	case CCONV_GBL_TO_GHS:
+		cconv_cconv_first(CCONV_GBL_TO_UHS, CCONV_GBL_TO_GHS);
+		cconv_iconv_second(cd_struct->utf8_gb);
+
+	case CCONV_GBL_TO_GHT:
+		cconv_cconv_first(CCONV_GBL_TO_UHT, CCONV_GBL_TO_GHT);
+		cconv_iconv_second(cd_struct->utf8_gb);
+
+	case CCONV_BIG_TO_UHS:
+		cconv_iconv_first(cd_struct->bg_utf8);
+		cconv_cconv_second(CCONV_UTF_TO_UHS, CCONV_BIG_TO_UHS);
+
+	case CCONV_BIG_TO_GBL:
+		cconv_cconv_first(CCONV_BIG_TO_UHS, CCONV_BIG_TO_GBL);
+		cconv_iconv_second(cd_struct->utf8_gb);
 	
-	case CCONV_UTF_S_TO_T:
-	for (; (*inbytesleft) > 0 && (*outbytesleft) > 0; ) {
-		i_proc = utf_char_width(const_bin_c_str(ps_inbuf));
-		if(i_proc > (*inbytesleft))
-			break;
-
-		if(i_proc > 1)
-		{
-			index = find_keyword(CCONV_UTF_S_TO_T, ps_inbuf, &i_proc, 0, s2t_size() - 1, i_offset);
-			if(index != -1)
-			{
-				o_proc = strlen(s2t_val(index));
-				memcpy(ps_outbuf + i_conv, s2t_val(index), o_proc);
-				ps_inbuf	+= i_proc;
-				(*inbytesleft)  -= i_proc;
-				(*outbytesleft) += o_proc;
-				i_conv          += o_proc;
-				i_offset         = (*inbuf) - ps_inbuf;
-				continue;
-			}
-		}
-		else if(i_proc == -1)
-		{
-			errno  = EINVAL;
-			return (size_t)(-2);
-		}
-
-		memcpy(ps_outbuf + i_conv, ps_inbuf, i_proc);
-		ps_inbuf	+= i_proc;
-		(*inbytesleft)  -= i_proc;
-		(*outbytesleft) += i_proc;
-		i_conv	        += i_proc;
-		i_offset         = (*inbuf) - ps_inbuf;
-	} // for
-
-	*inbuf  = ps_inbuf;
-	*outbuf = ps_outbuf + i_conv;
-	ps_outbuf[i_conv] = '\0';
-	return i_conv;
-
-	case CCONV_UTF_T_TO_S:
-	for (; (*inbytesleft) > 0 && (*outbytesleft) > 0; ) {
-		i_proc = utf_char_width(const_bin_c_str(ps_inbuf));
-		if(i_proc > (*inbytesleft))
-			break;
-
-		if(i_proc > 1)
-		{
-			index = find_keyword(CCONV_UTF_T_TO_S, ps_inbuf, &i_proc, 0, t2s_size() - 1, i_offset);
-			if(index != -1)
-			{
-				o_proc = strlen(t2s_val(index));
-				memcpy(ps_outbuf + i_conv, t2s_val(index), o_proc);
-				ps_inbuf	+= i_proc;
-				(*inbytesleft)  -= i_proc;
-				(*outbytesleft) += o_proc;
-				i_conv          += o_proc;
-				i_offset         = (*inbuf) - ps_inbuf;
-				continue;
-			}
-		}
-		else if(i_proc == -1)
-		{
-			errno  = EINVAL;
-			return (size_t)(-2);
-		}
-
-		memcpy(ps_outbuf + i_conv, ps_inbuf, i_proc);
-		ps_inbuf	+= i_proc;
-		(*inbytesleft)  -= i_proc;
-		(*outbytesleft) += i_proc;
-		i_conv          += i_proc;
-		i_offset         = (*inbuf) - ps_inbuf;
-	} // for
-	*inbuf  = ps_inbuf;
-	*outbuf = ps_outbuf + i_conv;
-	ps_outbuf[i_conv] = '\0';
-	return i_conv;
-
 	case CCONV_NULL:
 	default:
 		break;
@@ -354,63 +329,133 @@ size_t cconv(cconv_t cd,
 }
 /* }}} */
 
-
 /* {{{ int cconv_close( cconv_t cd ) */
 /**
  * Close a cconv handle.
  *
- * @param   cd          Jconv handle.
+ * @param   cd          Cconv handle.
  * @return              0: succ, -1: fail.
  */
-int cconv_close( cconv_t cd )
+int cconv_close(cconv_t cd)
 {
-	cconv_struct *cd_struct = cd;
-	iconv_t icd = cd_struct->iconv_cd;
-	if(cd != NULL && icd != NULL && icd != (iconv_t)(-1))
-		iconv_close(cd_struct->iconv_cd);
-
-	free(cd);
-	cd = NULL;
-	return(0);
+	cconv_struct *c = cd;
+	if(c->iconv_cd && (iconv_t)(-1) != c->iconv_cd) iconv_close(c->iconv_cd);
+	if(c->gb_utf8  && (iconv_t)(-1) != c->gb_utf8 ) iconv_close(c->gb_utf8 );
+	if(c->bg_utf8  && (iconv_t)(-1) != c->bg_utf8 ) iconv_close(c->bg_utf8 );
+	if(c->utf8_gb  && (iconv_t)(-1) != c->utf8_gb ) iconv_close(c->utf8_gb );
+	if(c->utf8_bg  && (iconv_t)(-1) != c->utf8_bg ) iconv_close(c->utf8_bg );
+	free(c);
+	return 0;
 }
 /* }}} */
 
+size_t cconv_utf8(const char** inbuf, size_t* inleft, char**  outbuf, size_t* outleft, const language_zh_map *m, int map_size)
+{
+	const char *ps_inbuf;
+	char *ps_outbuf;
+	int index;
+	size_t i_proc, o_proc, i_conv = 0;
+
+	ps_inbuf  = *inbuf;
+	ps_outbuf = *outbuf;
+	for (; *inleft > 0 && *outleft > 0; )
+	{
+		if((i_proc = utf8_char_width(const_bin_c_str(ps_inbuf))) > *inleft)
+			break;
+
+		if(i_proc > 1 &&
+		  (index = find_keyword(ps_inbuf, &i_proc, m, 0, map_size - 1, i_conv)) != -1)
+		{
+			o_proc = strlen(map_val(m, index));
+			memcpy(ps_outbuf, map_val(m, index), o_proc);
+			ps_inbuf  += i_proc;
+			ps_outbuf += o_proc;
+			*inleft   -= i_proc;
+			*outleft  -= o_proc;
+			i_conv    += i_proc;
+			continue;
+		}
+		
+		if(i_proc == -1)
+		{
+			errno  = EINVAL;
+			return (size_t)(-2);
+		}
+
+		memcpy(ps_outbuf, ps_inbuf, i_proc);
+		ps_inbuf  += i_proc;
+		ps_outbuf += i_proc;
+		*inleft   -= i_proc;
+		*outleft  -= i_proc;
+		i_conv    += i_proc;
+	}
+
+	*ps_outbuf = '\0';
+	*inbuf  = ps_inbuf;
+	*outbuf = ps_outbuf;
+	return i_conv;
+}
+
+int find_keyword(const char* inbytes, size_t* length, const language_zh_map *m, int begin, int end, const int whence)
+{
+	int location, offset;
+	size_t wwidth, nwidth;
+
+	if((offset = binary_find(inbytes, length, m, begin, end)) == -1)
+		return -1;
+
+	/* match the most accurate value */
+	wwidth = *length;
+	do{
+		location = offset;
+		*length  = wwidth;
+		nwidth   = utf8_char_width(const_bin_c_str(inbytes+wwidth));
+		wwidth  += nwidth;
+	}
+	while(nwidth != 0 && (offset = binary_find(inbytes, &wwidth, m, offset, end)) != -1);
+
+	/* extention word fix */
+	if(!match_cond(cond_ptr(m, location), inbytes, strlen(map_key(m, location)), whence))
+	{
+		*length = utf8_char_width(const_bin_c_str(inbytes));
+		return -1;
+	}
+
+	return location;
+}
 
 /* {{{ int binary_find(cconv_t cd, const char* inbytes, int length, int begin, int end) */
-int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, int end)
+int binary_find(const char* inbytes, size_t* length, const language_zh_map *m, int begin, int end)
 {
-	language_zh_map *map;
 	int middle, last, next_fix = 0;
 	int ret, offset = -1;
 	size_t width, wwidth, nwidth;
 
-	map = get_zh_map(cd);
 	middle = (begin + end) >> 1;
 	width  = *length;
-	last   = end;
-	
+	last   = end;	
 	while(1)
 	{
-		ret = memcmp(map[middle].key, inbytes, width);
+		ret = memcmp(m[middle].key, inbytes, width);
 		if(ret == 0)
 		{
-			if(width == strlen(map[middle].key))
+			if(width == strlen(m[middle].key))
 				return middle;
 
 			/* word key */
 			if(next_fix == 0)
 			{
-				nwidth = utf_char_width(const_bin_c_str(inbytes+width));
+				nwidth = utf8_char_width(const_bin_c_str(inbytes+width));
 				wwidth = width + nwidth;
-				if(nwidth != 0 && memcmp(map[middle].key, inbytes, wwidth) <= 0)
+				if(nwidth != 0 && memcmp(m[middle].key, inbytes, wwidth) <= 0)
 				{
 					while (nwidth != 0
-						&& (offset = binary_find(cd, inbytes, &wwidth, offset, end)) != -1)
+						&& (offset = binary_find(inbytes, &wwidth, m, offset, end)) != -1)
 					{
-						if(wwidth == strlen(map[offset].key))
+						if(wwidth == strlen(m[offset].key))
 							return offset;
 
-						nwidth = utf_char_width(const_bin_c_str(inbytes+width));
+						nwidth = utf8_char_width(const_bin_c_str(inbytes+width));
 						wwidth += nwidth;
 					}
 
@@ -438,65 +483,24 @@ int binary_find(cconv_type cd, const char* inbytes, size_t* length, int begin, i
 }
 /* }}} */
 
-int find_keyword(cconv_type cd, const char* inbytes, size_t* length, int begin, int end, const int whence)
-{
-	int location, offset;
-	size_t wwidth, nwidth;
-
-	if((offset = binary_find(cd, inbytes, length, begin, end)) == -1)
-		return -1;
-
-	/* match the most accurate value */
-	wwidth = *length;
-	do{
-		location = offset;
-		*length  = wwidth;
-		nwidth   = utf_char_width(const_bin_c_str(inbytes+wwidth));
-		wwidth  += nwidth;
-	}
-	while(nwidth != 0 && (offset = binary_find(cd, inbytes, &wwidth, offset, end)) != -1);
-
-	/* extention word fix, s to t */
-	if(cd == CCONV_UTF_S_TO_T)
-	{
-		if(!match_cond(s2t_cond_ptr(location), inbytes, strlen(s2t_key(location)), whence))
-		{
-			*length = utf_char_width(const_bin_c_str(inbytes));
-			return -1;
-		}
-	}
-
-	/* extention word fix, t to s */
-	if(cd == CCONV_UTF_T_TO_S)
-	{
-		if(!match_cond(t2s_cond_ptr(location), inbytes, strlen(t2s_key(location)), whence))
-		{
-			*length = utf_char_width(const_bin_c_str(inbytes));
-			return -1;
-		}
-	}
-
-	return location;
-}
-
 int match_cond(const factor_zh_map *cond, const char* str, int klen, const int whence)
 {
 	int y_ma, y_mb;
 	const char *cond_str = NULL;
 	const char *y_a_null, *y_b_null;
 
-	cond_str = get_cond_c_str(cond, n_ma);
+	cond_str = cond_c_str(cond, n_ma);
 	if(cond_str && match_real_cond(cond_str , str + klen, 0, whence))
 		return 0;
 
-	cond_str = get_cond_c_str(cond, n_mb);
+	cond_str = cond_c_str(cond, n_mb);
 	if(cond_str && match_real_cond(cond_str , str, 1, whence))
 		return 0;
 
-	y_b_null = cond_str = get_cond_c_str(cond, y_mb);
+	y_b_null = cond_str = cond_c_str(cond, y_mb);
 	y_ma = cond_str && match_real_cond(cond_str, str, 1, whence);
 	
-	y_a_null = cond_str = get_cond_c_str(cond, y_ma);
+	y_a_null = cond_str = cond_c_str(cond, y_ma);
 	y_mb = cond_str && match_real_cond(cond_str, str + klen, 0, whence);
 	return (!y_b_null&&!y_a_null) | y_ma | y_mb;
 }

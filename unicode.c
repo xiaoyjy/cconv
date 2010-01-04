@@ -12,7 +12,7 @@
 
 #include "unicode.h"
 
-int utf_char_width(const unsigned char* w)
+int utf8_char_width(const unsigned char* w)
 {
 	if(w[0] < 0x80) return 1;
 	if(w[0] < 0xe0) return 2;
@@ -24,7 +24,7 @@ int utf_char_width(const unsigned char* w)
 	return -1;
 }
 
-int unicode_char_encode(const unsigned char* w, int* c)
+int utf8_char_encode(const unsigned char* w, int* c)
 {
 	/* 00000000-01111111	00-7F	0-127	US-ASCII (single byte) */
 	if(w[0] < 0x80) {
@@ -89,7 +89,7 @@ int unicode_char_encode(const unsigned char* w, int* c)
 	return -1;
 }
 
-int unicode_char_decode(int unicode, unsigned char* utf)
+int utf8_char_decode(int unicode, unsigned char* utf)
 {
 	int count = -1;
 
@@ -119,5 +119,4 @@ int unicode_char_decode(int unicode, unsigned char* utf)
 
 	return count;	
 }
-
 

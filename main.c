@@ -61,7 +61,6 @@ static void usage(char *s_program)
 	printf("  -?, -h, -v  Show this help page.\n");
 	printf("Report bugs to <%s>\n", PACKAGE_BUGREPORT);
 }
-
 /* }}} */
 
 
@@ -79,13 +78,42 @@ void code_list( void )
 	printf("European languages:\n");
 	printf("   ASCII\n");
 	printf("Chinese:\n");
-	printf("   GBK, BIG5, UTF8, UTF8-CN, UTF8-TW, UTF8-HK\n");
+	printf("   GB2312, GBK, GB-HANS,GB-HANT ,GB18030, BIG5, UTF8, UTF8-CN, UTF8-TW, UTF8-HK\n");
 	printf("Other:\n");
 	printf("   All encoding supported by iconv.\n");
 	printf("\n");
 }
 /* }}} */
 
+const char* filter_code(const char* code)
+{
+	if(strcasecmp("UTF8", code) == 0)
+		return CCONV_CODE_UTF;
+
+	if(  strcasecmp("GB2312", code) == 0
+          || strcasecmp("GBK", code) == 0)
+		return CCONV_CODE_GBL;
+
+	if(  strcasecmp("UTF8-CN" , code) == 0
+	  || strcasecmp("UTF-8-CN", code) == 0)
+		return CCONV_CODE_UHS;
+
+	if(  strcasecmp("UTF8-TW" , code) == 0
+	  || strcasecmp("UTF-8-TW", code) == 0
+	  || strcasecmp("UTF8-HK" , code) == 0
+	  || strcasecmp("UTF-8-HK", code) == 0)
+		return CCONV_CODE_UHT;
+
+	if(  strcasecmp("BIG5"     , code) == 0
+          || strcasecmp("BIG-5"    , code) == 0
+          || strcasecmp("CN-BIG5"  , code) == 0
+          || strcasecmp("BIG5HKSCS", code) == 0
+          || strcasecmp("BIG-FIVE" , code) == 0
+          || strcasecmp("BIGFIVE"  , code) == 0)
+		return CCONV_CODE_BIG;
+
+	return code;
+}
 
 /**
  * Main function.
@@ -110,25 +138,21 @@ int main(int argc, char *argv[])
 		switch (ch) {
 		case 'f':
 			fromcode = optarg;
-			if(strcasecmp("UTF8", fromcode) == 0)
-				fromcode = "UTF-8"; 
 			break;
 		case 't':
-			tocode = optarg;
-			if(strcasecmp("UTF8", tocode) == 0)
-				tocode   = "UTF-8";
+			tocode   = optarg;
 			break;
 		case 'i':
 			if((fp_in = fopen(optarg, "r")) == NULL)
 			{
-				printf("   %s %s\n", optarg, strerror(errno));
+				printf("%s: '%s' %s\n", argv[0], optarg, strerror(errno));
 				return 0;
 			}
 			break;
 		case 'o':
 			if((fp_out = fopen(optarg, "w")) == NULL)
 			{
-				printf("%s: %s %s\n", argv[0], optarg, strerror(errno));
+				printf("%s: '%s' %s\n", argv[0], optarg, strerror(errno));
 				return 0;
 			}
 			break;
@@ -146,11 +170,14 @@ int main(int argc, char *argv[])
 		return (0);
 	} // if
 
+	tocode   = filter_code(tocode  );
+	fromcode = filter_code(fromcode);
+
 	if(fp_in == NULL && argc > 1 && access(argv[argc - 1], R_OK) == 0)
 	{
 		if((fp_in = fopen(argv[argc - 1], "r")) == NULL)
 		{
-			printf("%s: %s %s\n", argv[0], optarg, strerror(errno));
+			printf("%s: '%s' %s\n", argv[0], optarg, strerror(errno));
 			return 0;
 		}
 	}
@@ -199,7 +226,7 @@ int main(int argc, char *argv[])
 #endif
 		if((int)ret < 0)
 		{
-			fprintf(stderr, "%s: %s\n", argv[0], strerror(errno));
+			fprintf(stderr, "%s: [Error] %s\n", argv[0], strerror(errno));
 			break;
 		}
 
@@ -222,7 +249,7 @@ int main(int argc, char *argv[])
 		ret = cconv(conv, &ps_inbuf, &inlen, &ps_outbuf, &outlen);
 #endif
 		if((int)ret < 0) {
-			fprintf(stderr, "%s: %s\n", argv[0], strerror(errno));
+			fprintf(stderr, "%s: [Error] %s\n", argv[0], strerror(errno));
 			return 0;
 		}
 		fprintf(fp_out, "%s", outbuf);
