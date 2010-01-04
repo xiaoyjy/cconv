@@ -40,18 +40,7 @@ language_zh_map;
 #define zh_map_size(cd) \
 	(cd == CCONV_UTF_TO_UHT) ? map_uni_s2t_size : map_uni_t2s_size
 
-#define s2t_have_cond(x) (map_uni_s2t[x].cond != -1)
-#define t2s_have_cond(x) (map_uni_t2s[x].cond != -1)
-
 #define have_cond(a, x) (a[x].cond != -1)
-
-#define s2t_cond_ptr(x) \
-	(map_uni_s2t[x].cond != -1 ? \
-	&map_zh_cond[map_uni_s2t[x].cond] : NULL)
-
-#define t2s_cond_ptr(x) \
-	(map_uni_t2s[x].cond != -1 ? \
-	&map_zh_cond[map_uni_t2s[x].cond] : NULL)
 
 #define cond_ptr(a, x) \
 	(a[x].cond != -1 ? \
@@ -62,16 +51,7 @@ language_zh_map;
 	(o != NULL && o->t != -1 ? zh_sets_cond[o->t] : NULL)
 
 /* DO Make sure the cond offset is NOT -1 */
-#define s2t_cond_gobal_c_str(x, t) zh_sets_cond[map_zh_cond[map_uni_s2t[x].cond].t]
-#define t2s_cond_gobal_c_str(x, t) zh_sets_cond[map_zh_cond[map_uni_t2s[x].cond].t]
-
 #define cond_gobal_c_str(a, x, t) zh_sets_cond[map_zh_cond[a[x].cond].t]
-
-#define s2t_key(x) map_uni_s2t[x].key
-#define s2t_val(x) map_uni_s2t[x].val
-
-#define t2s_key(x) map_uni_t2s[x].key
-#define t2s_val(x) map_uni_t2s[x].val
 
 #define map_key(a, x) a[x].key
 #define map_val(a, x) a[x].val
