@@ -20,10 +20,10 @@
 
 	Increase four kinds of prefix & suffix based conditions conversion
 	mode:
-		1、convert the prefix match before only
-		2、convert the suffix match before only
-		3、prefix match is not to convert.
-		4、suffix match is not to convert.
+		# convert the prefix match before only
+		# convert the suffix match before only
+		# prefix match is not to convert.
+		# suffix match is not to convert.
 
 -- 0.5.2
 	Add AC_CONFIG_MACRO_DIR([m4]) to fix complie error on CentOS 4.X
