@@ -93,10 +93,10 @@ cconv_t cconv_open(const char* tocode, const char* fromcode)
 	cconv_struct* cd = (cconv_struct*)malloc(sizeof(cconv_struct));
 	cd->cconv_cd = CCONV_NULL;
 	cd->iconv_cd = NULL;
-	cd->gb_utf8 = NULL;
-	cd->bg_utf8 = NULL;
-	cd->utf8_gb = NULL;
-	cd->utf8_bg = NULL;
+	cd->gb_utf8  = NULL;
+	cd->bg_utf8  = NULL;
+	cd->utf8_gb  = NULL;
+	cd->utf8_bg  = NULL;
 	cd->size_factor = 4;
 
 	/* //IGNORE //TRANSPORT etc. */
@@ -154,7 +154,7 @@ cconv_t cconv_open(const char* tocode, const char* fromcode)
 		else if(0 == strcasecmp(CCONV_CODE_BIG, tocode))
 		{
 			cd->cconv_cd = CCONV_UTF_TO_BIG;
-			cd->utf8_bg  = iconv_open(CCONV_CODE_GBL, CCONV_CODE_UTF);
+			cd->utf8_bg  = iconv_open(CCONV_CODE_BIG, CCONV_CODE_UTF);
 		}
 
 		cd->size_factor = 1;
@@ -172,7 +172,6 @@ cconv_t cconv_open(const char* tocode, const char* fromcode)
 		{
 			cd->cconv_cd = CCONV_BIG_TO_UHS;
 			cd->bg_utf8  = iconv_open(CCONV_CODE_UTF, CCONV_CODE_BIG);
-printf("%s %s", CCONV_CODE_BIG, CCONV_CODE_UTF);
 		}
 
 		/* just use iconv to do others. */

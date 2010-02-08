@@ -6,7 +6,7 @@ iconv is a open source international text conversion tool, if you do not know ic
 
 As usual for GNU packages:
 
-$ ./configure --prefix=/usr/local
+$ ./configure --prefix=/usr
 $ make
 $ make install
 
@@ -36,5 +36,4 @@ $ echo "美发现号航天飞机, 上头发奖金；头发应该剪了，后天�
 
 Copyright:
 All the source files and header files are under LGPL.
-
 The cconv program is under GPL.  
