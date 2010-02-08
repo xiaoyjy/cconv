@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = no-dependencies
 
-EXTRA_DIST = cconv_table.h cconv_table.cc m4/*.m4 THANKS test_s2t test_t2s
+EXTRA_DIST = cconv_table.h cconv_table.cc THANKS test_s2t test_t2s m4/*.m4
 
 AC_CFLAGS = -Wall @ICONV_INCLUDES@ @OS_TYPE@
 ACLOCAL_AMFLAGS = -I m4
