@@ -1,4 +1,9 @@
-==== Changlog ====
+
+-- 0.6.2
+	Add GB-Hans GB-Hant encoding which were used to represent GB charset in Simplified and Traditional.
+	Use gb18030 handing all GB code.
+
+	Support convert gbk to gb-hant or gb-hans.
 
 -- 0.6.1
 	Update cconv_table.cc to latest.

@@ -34,7 +34,6 @@
  * Output usage.
  *
  * @param   s_program   Program command line.
- * @return			  alway = 0.
  */
 static void usage(char *s_program)
 {
@@ -68,17 +67,14 @@ static void usage(char *s_program)
 /**
  * Output encodings are supported.
  *
- * @return			  alway = 0.
  */
 void code_list( void )
 {
 	printf("\n");
 	printf("The following encodings are supported:\n");
 	printf("\n");
-	printf("European languages:\n");
-	printf("   ASCII\n");
 	printf("Chinese:\n");
-	printf("   GB2312, GBK, GB-HANS,GB-HANT ,GB18030, BIG5, UTF8, UTF8-CN, UTF8-TW, UTF8-HK\n");
+	printf("   GB2312, GBK, GB-HANS, GB-HANT, GB18030, BIG5, UTF8, UTF8-CN, UTF8-TW, UTF8-HK\n");
 	printf("Other:\n");
 	printf("   All encoding supported by iconv.\n");
 	printf("\n");
@@ -104,7 +100,7 @@ const char* filter_code(const char* code)
 	  || strcasecmp("UTF-8-HK", code) == 0)
 		return CCONV_CODE_UHT;
 
-	if(  strcasecmp("BIG5"     , code) == 0
+	if(  strcasecmp("BIG5-2003"     , code) == 0
           || strcasecmp("BIG-5"    , code) == 0
           || strcasecmp("CN-BIG5"  , code) == 0
           || strcasecmp("BIG5HKSCS", code) == 0
@@ -127,7 +123,8 @@ int main(int argc, char *argv[])
 	cconv_t conv;
 	const char *tocode   = NULL,
 		   *fromcode = NULL;
-	size_t inlen, outlen, ret, i_left, inbuf_size, outbuf_size;
+	size_t ret = 0;
+	size_t inlen, outlen, i_left, inbuf_size, outbuf_size;
 	int    ch = 0;
 
 	inbuf  = (char*)malloc(CCONV_BUFFER_SIZE);
@@ -226,7 +223,7 @@ int main(int argc, char *argv[])
 #endif
 		if((int)ret < 0)
 		{
-			fprintf(stderr, "%s: [Error] %s\n", argv[0], strerror(errno));
+			fprintf(stderr, "%s: [Error] %s", argv[0], strerror(errno));
 			break;
 		}
 
@@ -239,7 +236,7 @@ int main(int argc, char *argv[])
 		fprintf(fp_out, "%s", outbuf);
 	}
 
-	if(*inbuf != '\0')
+	if(*inbuf != '\0' && ret > 0)
 	{
 		ps_inbuf  = inbuf;
 		ps_outbuf = outbuf;

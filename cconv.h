@@ -19,7 +19,7 @@
 
 // GBL means LARGEST of GB encoding.
 #define CCONV_CODE_GBL  "GB18030"
-#define CCONV_CODE_BIG  "BIG5-HKSCS"
+#define CCONV_CODE_BIG  "BIG5"
 
 #define CCONV_CODE_UCN  "UTF8-CN"
 #define CCONV_CODE_UTW  "UTF8-TW"
