@@ -353,7 +353,7 @@ size_t cconv_utf8(const char** inbuf, size_t* inleft, char**  outbuf, size_t* ou
 	const char *ps_inbuf;
 	char *ps_outbuf;
 	int index;
-	size_t i_proc, o_proc, i_conv = 0;
+	size_t i_proc, o_proc, i_conv = 0, o_conv;
 
 	ps_inbuf  = *inbuf;
 	ps_outbuf = *outbuf;
@@ -389,10 +389,11 @@ size_t cconv_utf8(const char** inbuf, size_t* inleft, char**  outbuf, size_t* ou
 		i_conv    += i_proc;
 	}
 
+	o_conv = ps_outbuf - *outbuf;
 	*ps_outbuf = '\0';
 	*inbuf  = ps_inbuf;
 	*outbuf = ps_outbuf;
-	return i_conv;
+	return o_conv;
 }
 
 int find_keyword(const char* inbytes, size_t* length, const language_zh_map *m, int begin, int end, const int whence)
