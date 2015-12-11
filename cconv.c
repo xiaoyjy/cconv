@@ -355,7 +355,7 @@ size_t cconv_utf8(const char** inbuf, size_t* inleft, char**  outbuf, size_t* ou
 	int index;
 	size_t i_proc, o_proc, i_conv = 0, o_conv;
 
-	ps_inbuf  = *inbuf;
+	ps_inbuf  = *inbuf ;
 	ps_outbuf = *outbuf;
 	for (; *inleft > 0 && *outleft > 0; )
 	{
@@ -375,7 +375,7 @@ size_t cconv_utf8(const char** inbuf, size_t* inleft, char**  outbuf, size_t* ou
 			continue;
 		}
 		
-		if(i_proc == -1)
+		if(i_proc == (size_t)(-1))
 		{
 			errno  = EINVAL;
 			return (size_t)(-2);

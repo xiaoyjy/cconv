@@ -51,6 +51,10 @@ cconv_type;
 
 typedef void* cconv_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* {{{ cconv_t cconv_open(const char* tocode, const char* fromcode) */
 /**
  * Open a cconv handle.
@@ -90,5 +94,9 @@ extern size_t cconv(cconv_t cd,
  */
 extern int cconv_close(cconv_t cd);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif // _CCONV_H_
 

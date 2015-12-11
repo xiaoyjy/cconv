@@ -49,7 +49,7 @@ static void usage(char *s_program)
 	printf("\n" );
 	printf(" Input/Output format specification:\n");
 	printf("  -f [NAME] encoding of original text! at this you can use GBK, BIG5 or UTF8\n");
-	printf("  -t [NAME] encoding for output! at this you can use GBK, BIG5, UTF8-CN, UTF8-HK or UTF-TW\n");
+	printf("  -t [NAME] encoding for output! at this you can use GBK, BIG5, UTF8-CN, UTF8-HK or UTF8-TW\n");
 	printf("\n" );
 	printf(" Information:\n" );
 	printf("  -l list coded character sets can used \n");
@@ -203,7 +203,19 @@ int main(int argc, char *argv[])
 		if(ps_inbuf[inlen - 1] != '\n')
 		{
 			inbuf       = (char*)realloc(inbuf , inbuf_size + CCONV_BUFFER_SIZE);
+			if(inbuf == NULL)
+			{
+				fprintf(stderr, "%s: [Error] %s", argv[0], strerror(errno));
+				exit(0);
+			}
+
 			outbuf      = (char*)realloc(outbuf, outbuf_size+ CCONV_BUFFER_SIZE * 2);
+			if(outbuf == NULL)
+			{
+				fprintf(stderr, "%s: [Error] %s", argv[0], strerror(errno));
+				exit(0);
+			}
+
 			inbuf_size += CCONV_BUFFER_SIZE;
 			outbuf_size+= CCONV_BUFFER_SIZE * 2;
 			outlen      = outbuf_size;
@@ -229,14 +241,14 @@ int main(int argc, char *argv[])
 
 		outlen = outbuf_size;
 		outbuf[ret] = '\0';
-		ps_inbuf  = inbuf;
-		ps_outbuf = outbuf;
-		*ps_inbuf = '\0';
-		i_left    = inbuf_size;
+		ps_inbuf    = inbuf;
+		ps_outbuf   = outbuf;
+		*ps_inbuf   = '\0';
+		i_left      = inbuf_size;
 		fprintf(fp_out, "%s", outbuf);
 	}
 
-	if(*inbuf != '\0' && ret > 0)
+	if(*inbuf != '\0' && ret >= 0)
 	{
 		ps_inbuf  = inbuf;
 		ps_outbuf = outbuf;
