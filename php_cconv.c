@@ -6,7 +6,7 @@
 	#include "config.h"
 #endif
 
-static function_entry cconv_functions[] = {
+static zend_function_entry cconv_functions[] = {
     PHP_FE(cconv, NULL)
     {NULL, NULL, NULL}
 };
