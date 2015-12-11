@@ -35,5 +35,4 @@ $ echo "美发现号航天飞机, 上头发奖金；头发应该剪了，后天�
 美發現號航天飛機, 上頭發獎金；頭髮應該剪了，後天，皇后
 
 Copyright:
-All the source files and header files are under LGPL.
-The cconv program is under GPL.  
+The cconv program is under MIT.  
