@@ -1,9 +1,8 @@
 === Introduction ===
+This is the new address of https://code.google.com/p/cconv/
 
 A iconv based simplified-traditional chinese conversion tool
-
 iconv is a open source international text conversion tool, if you do not know iconv, go to http://www.gnu.org/software/libiconv/#introduction to learn more.
-
 As usual for GNU packages:
 
 $ ./configure --prefix=/usr
