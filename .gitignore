@@ -1,0 +1,13 @@
+.libs
+ar-lib
+autom4te.cache
+m4
+*.
+*.log
+*.la
+*.lo
+cconv
+config.status
+config.sub
+configure
+install-sh
