@@ -1,13 +1,25 @@
 /*
- * Copyright (C) 2008, 2009
- * Free Software Foundation, Inc.
+ * Copyright (c) 2008, 2009 Yang Jianyu
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * \author Yang Jianyu <xiaoyjy@hotmail.com>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * \author Yang Jianyu <xiaoyjy@gmail.com>
  */
 
 #include <stdio.h>
@@ -143,14 +155,14 @@ int main(int argc, char *argv[])
 			if((fp_in = fopen(optarg, "r")) == NULL)
 			{
 				printf("%s: '%s' %s\n", argv[0], optarg, strerror(errno));
-				return 0;
+				return 1;
 			}
 			break;
 		case 'o':
 			if((fp_out = fopen(optarg, "w")) == NULL)
 			{
 				printf("%s: '%s' %s\n", argv[0], optarg, strerror(errno));
-				return 0;
+				return 2;
 			}
 			break;
 		case 'l':
@@ -206,14 +218,15 @@ int main(int argc, char *argv[])
 			if(inbuf == NULL)
 			{
 				fprintf(stderr, "%s: [Error] %s", argv[0], strerror(errno));
-				exit(0);
+				exit(3);
 			}
 
 			outbuf      = (char*)realloc(outbuf, outbuf_size+ CCONV_BUFFER_SIZE * 2);
 			if(outbuf == NULL)
 			{
+                free(inbuf);
 				fprintf(stderr, "%s: [Error] %s", argv[0], strerror(errno));
-				exit(0);
+				exit(3);
 			}
 
 			inbuf_size += CCONV_BUFFER_SIZE;

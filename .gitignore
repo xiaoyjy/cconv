@@ -1,13 +1,90 @@
-.libs
-ar-lib
-autom4te.cache
+# ---------------
+# 编译产物
+# ---------------
+# 可执行文件
+/cconv
+# 静态库和动态库
+/*.a
+/*.la
+/*.lo
+/*.so
+/*.so.*
+/*.dylib
+# 目标文件
+/*.o
+# Libtool 中间目录
+/.libs/
+# Automake 生成的依赖文件目录
+/.deps/
+# Makefile 生成的 stamp 文件
+/.dirstamp
+
+# ---------------
+# 自动生成的文件
+# ---------------
+# Autoconf / Automake 生成的脚本和配置文件
+/Makefile
+/Makefile.in
+/configure
+/config.h
+/config.h.in
+/config.status
+/config.log
+# Autoconf 缓存和宏文件
+/autom4te.cache/
+/aclocal.m4
+# Libtool 生成的脚本
+/ltmain.sh
+/compile
+/missing
+/install-sh
+# 其他可能的自动生成文件
+/stamp-h1
 m4
-*.
-*.log
-*.la
-*.lo
-cconv
-config.status
+ar-lib
 config.sub
-configure
-install-sh
+
+# ---------------
+# 编辑器和IDE文件
+# ---------------
+# Vim
+.*.swp
+.*.swo
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+# VS Code
+/.vscode/
+/*.code-workspace
+.history/
+# Xcode
+/.DS_Store
+/*.pbxuser
+!default.pbxuser
+/*.mode1v3
+!default.mode1v3
+/*.mode2v3
+!default.mode2v3
+/*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+Build/
+# CLion
+/.idea/
+cmake-build-*/
+*.iml
+
+# ---------------
+# 其他临时文件
+# ---------------
+# 日志文件
+*.log
+# 备份文件
+*.bak
+*.tmp
+

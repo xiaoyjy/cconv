@@ -88,24 +88,30 @@ static int match_real_cond(
  */
 cconv_t cconv_open(const char* tocode, const char* fromcode)
 {
-	char code[8] = {0, };
+	char code[8] = {0};
 	char *ptr;
 	cconv_struct* cd = (cconv_struct*)malloc(sizeof(cconv_struct));
-	cd->cconv_cd = CCONV_NULL;
-	cd->iconv_cd = NULL;
-	cd->gb_utf8  = NULL;
-	cd->bg_utf8  = NULL;
-	cd->utf8_gb  = NULL;
-	cd->utf8_bg  = NULL;
-	cd->size_factor = 4;
+    if (!cd) {  
+        fprintf(stderr, "malloc failed: %s\n", strerror(errno));
+        return (cconv_t)CCONV_ERROR;
+    }
+    memset(cd, 0, sizeof(cconv_struct));  
+    cd->cconv_cd = CCONV_NULL;
+    cd->size_factor = 4;
 
 	/* //IGNORE //TRANSPORT etc. */
-	if((ptr = strstr(fromcode, "//")) != NULL)
-	{
-		strncpy(cd->options, ptr     , 16);
-		strncpy(code       , fromcode, ptr - fromcode);
-		fromcode = code;
-	}
+    if ((ptr = strstr(fromcode, "//")) != NULL) {
+        size_t opt_len = ptr - fromcode;
+        if (opt_len > sizeof(cd->options) - 1) {
+            opt_len = sizeof(cd->options) - 1;
+        }
+        strncpy(cd->options, ptr, opt_len);
+        cd->options[opt_len] = '\0';  // 强制null终止
+
+        strncpy(code, fromcode, ptr - fromcode);
+        code[ptr - fromcode] = '\0';  // 强制null终止
+        fromcode = code;
+    }
 
 	if(0 == strcasecmp(CCONV_CODE_GBL, fromcode))
 	{
@@ -183,7 +189,9 @@ cconv_t cconv_open(const char* tocode, const char* fromcode)
 	if( cd->iconv_cd == (iconv_t)(-1) || cd->gb_utf8  == (iconv_t)(-1)
 	 || cd->bg_utf8  == (iconv_t)(-1) || cd->utf8_gb  == (iconv_t)(-1)
 	 || cd->utf8_bg  == (iconv_t)(-1)) {
+        int saved_errno = errno;  
 		cconv_close(cd);
+        errno = saved_errno;
 		return (cconv_t)(CCONV_ERROR);
 	}
 
@@ -250,6 +258,7 @@ size_t cconv(cconv_t cd,
 		char**  outbuf,
 		size_t* outbytesleft)
 {
+
 	size_t  i_proc = 0, o_proc = 0;
 #ifdef FreeBSD
 	const char *ps_inbuf  = NULL;
@@ -321,10 +330,12 @@ size_t cconv(cconv_t cd,
 	} // switch
 
 	ps_outbuf = *outbuf;
-	if(iconv(cd_struct->iconv_cd, inbuf, inbytesleft, outbuf, outbytesleft) == -1)
-		return (size_t)(-1);
-
-	return *outbuf - ps_outbuf;
+    size_t ret = iconv(cd_struct->iconv_cd, inbuf, inbytesleft, outbuf, outbytesleft);
+    if (ret == (size_t)(-1)) {
+        fprintf(stderr, "iconv failed: %s (errno=%d)\n", strerror(errno), errno);
+        return (size_t)(-1);
+    }
+    return *outbuf - ps_outbuf;
 }
 /* }}} */
 
@@ -378,6 +389,7 @@ size_t cconv_utf8(const char** inbuf, size_t* inleft, char**  outbuf, size_t* ou
 		if(i_proc == (size_t)(-1))
 		{
 			errno  = EINVAL;
+            fprintf(stderr, "Invalid UTF-8 sequence at %p\n", ps_inbuf);
 			return (size_t)(-2);
 		}
 
