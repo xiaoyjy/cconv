@@ -87,4 +87,4 @@ cmake-build-*/
 # 备份文件
 *.bak
 *.tmp
-
+*~
